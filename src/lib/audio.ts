@@ -4,12 +4,14 @@
 import { getCtx } from './audioCtx'
 import { abaixarMusica, restaurarMusica } from './music'
 
-function tocarTom(freq: number, duracaoMs: number, volume = 0.25) {
+// Tons mais "cortantes" (onda quadrada/triângulo) furam melhor o volume da
+// música do que uma onda senoidal suave.
+function tocarTom(freq: number, duracaoMs: number, volume = 0.25, tipo: OscillatorType = 'sine') {
   try {
     const ac = getCtx()
     const osc = ac.createOscillator()
     const gain = ac.createGain()
-    osc.type = 'sine'
+    osc.type = tipo
     osc.frequency.value = freq
     gain.gain.setValueAtTime(volume, ac.currentTime)
     gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duracaoMs / 1000)
@@ -21,16 +23,30 @@ function tocarTom(freq: number, duracaoMs: number, volume = 0.25) {
   }
 }
 
-/** bipe curto da contagem (3, 2, 1...) */
-export const bipeContagem = () => tocarTom(880, 150)
-/** som de troca de exercício */
+/** Vibra o celular (quando suportado) — atravessa qualquer música alta. */
+export function vibrar(padrao: number | number[]) {
+  try {
+    navigator.vibrate?.(padrao)
+  } catch {
+    /* aparelho sem vibração — ignora */
+  }
+}
+
+/** bipe curto da contagem (3, 2, 1...) — alto, cortante e com vibração */
+export const bipeContagem = () => {
+  tocarTom(1050, 160, 0.6, 'square')
+  vibrar(110)
+}
+/** som de troca de exercício — duplo, forte e com vibração marcante */
 export const bipeTroca = () => {
-  tocarTom(660, 120)
-  setTimeout(() => tocarTom(990, 250), 130)
+  tocarTom(700, 150, 0.6, 'triangle')
+  setTimeout(() => tocarTom(1180, 320, 0.6, 'triangle'), 140)
+  vibrar([0, 240, 100, 240])
 }
 /** fanfarra simples de fim de treino */
 export const somVitoria = () => {
-  ;[523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tocarTom(f, 280, 0.2), i * 160))
+  ;[523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tocarTom(f, 280, 0.35, 'triangle'), i * 160))
+  vibrar([0, 130, 70, 130, 70, 260])
 }
 
 let vozPt: SpeechSynthesisVoice | null = null
@@ -55,7 +71,8 @@ export function falar(texto: string) {
     const u = new SpeechSynthesisUtterance(texto)
     u.lang = 'pt-BR'
     if (vozPt) u.voice = vozPt
-    u.rate = 1.05
+    u.rate = 1.0
+    u.volume = 1 // volume máximo para competir com a música
     // a música abaixa enquanto a voz fala (ducking)
     u.onstart = abaixarMusica
     u.onend = restaurarMusica

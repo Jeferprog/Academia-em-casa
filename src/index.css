@@ -319,6 +319,18 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Últimos 3 segundos: o número pulsa grande e o anel acende, para ser
+   visto de longe mesmo com a música no volume máximo. */
+.contagem-final .anel-frente { stroke: #ff5252; }
+.contagem-final .cronometro-num { color: #ff5252; }
+.contagem-final .cronometro-num {
+  animation: pulsar-contagem 0.9s ease;
+}
+@keyframes pulsar-contagem {
+  0% { transform: scale(1.7); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 .treino-info { text-align: center; min-height: 110px; }
 .treino-info h2 { margin: 0 0 6px; font-size: 1.4rem; }
 .dica { color: var(--texto2); margin: 0 0 6px; line-height: 1.45; }
