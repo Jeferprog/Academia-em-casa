@@ -1,5 +1,5 @@
 // Service worker: deixa o app funcionar offline depois da primeira visita.
-const CACHE = 'mexejunto-v4'
+const CACHE = 'mexejunto-v5'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./'])))

@@ -12,6 +12,10 @@ const SPOTIFY_API_BASE = 'https://api.spotify.com/v1'
 const K_SPOTIFY_TOKEN = 'aec.spotify.token'
 const K_SPOTIFY_EXPIRY = 'aec.spotify.expiry'
 const K_SPOTIFY_REFRESH = 'aec.spotify.refresh'
+// Verifier PKCE: em localStorage (não sessionStorage), porque sessionStorage
+// nem sempre sobrevive ao redirecionamento de volta do Spotify em alguns
+// navegadores/PWA — e aí a troca do código pelo token falhava em silêncio.
+const K_SPOTIFY_VERIFIER = 'aec.spotify.verifier'
 
 interface SpotifyToken {
   access_token: string
@@ -19,39 +23,32 @@ interface SpotifyToken {
   refresh_token?: string
 }
 
-// Gera par code_challenge/code_verifier para PKCE (sem client secret)
-async function gerarCodeChallenge(): Promise<{ verifier: string; challenge: string }> {
-  const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map((b) => String.fromCharCode(b))
+// Gera um code_verifier PKCE válido (64 chars do conjunto não-reservado).
+function gerarVerifier(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
+  return Array.from(crypto.getRandomValues(new Uint8Array(64)))
+    .map((b) => chars[b % chars.length])
     .join('')
-    .split('')
-    .map((c) => {
-      const code = c.charCodeAt(0)
-      if (code >= 48 && code <= 57) return c // 0-9
-      if (code >= 65 && code <= 90) return c // A-Z
-      if (code >= 97 && code <= 122) return c // a-z
-      return String.fromCharCode(((code % 26) + 97))
-    })
-    .join('')
-    .slice(0, 128)
+}
 
-  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
-  const challenge = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)))
+// code_challenge = base64url( SHA-256(verifier) )
+async function gerarChallenge(verifier: string): Promise<string> {
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+  return btoa(String.fromCharCode(...new Uint8Array(hash)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '')
-
-  return { verifier, challenge }
 }
 
 // Constrói URL de login do Spotify
 export async function obterURLLogin(): Promise<string> {
   if (!SPOTIFY_CLIENT_ID) {
-    throw new Error('VITE_SPOTIFY_CLIENT_ID não configurado no .env')
+    throw new Error('Client ID do Spotify não configurado.')
   }
 
-  const { challenge, verifier } = await gerarCodeChallenge()
-  sessionStorage.setItem('spotify_code_verifier', verifier)
+  const verifier = gerarVerifier()
+  const challenge = await gerarChallenge(verifier)
+  localStorage.setItem(K_SPOTIFY_VERIFIER, verifier)
 
   const params = new URLSearchParams({
     client_id: SPOTIFY_CLIENT_ID,
@@ -65,16 +62,17 @@ export async function obterURLLogin(): Promise<string> {
   return `${SPOTIFY_AUTH_ENDPOINT}?${params.toString()}`
 }
 
-// Processa o código de autorização depois do login
-export async function processarCallback(code: string): Promise<boolean> {
-  const verifier = sessionStorage.getItem('spotify_code_verifier')
+// Troca o código pelo token. Lança erro descritivo se algo falhar, para o
+// motivo aparecer na tela em vez de uma falha silenciosa.
+export async function processarCallback(code: string): Promise<void> {
+  const verifier = localStorage.getItem(K_SPOTIFY_VERIFIER)
   if (!verifier) {
-    console.error('Code verifier não encontrado')
-    return false
+    throw new Error('Código de verificação perdido no redirecionamento. Tente conectar de novo.')
   }
 
+  let response: Response
   try {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
+    response = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -85,17 +83,18 @@ export async function processarCallback(code: string): Promise<boolean> {
         code_verifier: verifier,
       }).toString(),
     })
-
-    if (!response.ok) throw new Error('Falha ao obter token')
-
-    const token = (await response.json()) as SpotifyToken
-    armazenarToken(token)
-    sessionStorage.removeItem('spotify_code_verifier')
-    return true
-  } catch (e) {
-    console.error('Erro no callback OAuth:', e)
-    return false
+  } catch {
+    throw new Error('Sem conexão com o Spotify ao trocar o token.')
   }
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(`Spotify recusou o login (${response.status}). ${txt.slice(0, 140)}`)
+  }
+
+  const token = (await response.json()) as SpotifyToken
+  armazenarToken(token)
+  localStorage.removeItem(K_SPOTIFY_VERIFIER)
 }
 
 function armazenarToken(token: SpotifyToken) {

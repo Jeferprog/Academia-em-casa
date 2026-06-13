@@ -38,15 +38,23 @@ export default function App() {
   const [novasConquistas, setNovasConquistas] = useState<Conquista[]>([])
   const [resumo, setResumo] = useState({ minutos: 0, exercicios: 0 })
   const [spotifyConectado, setSpotifyConectado] = useState(() => estaConectado())
+  const [spotifyErroLogin, setSpotifyErroLogin] = useState<string | null>(null)
 
   // Processa o retorno do login do Spotify logo na abertura do app, qualquer
   // que seja a tela — antes só funcionava se já estivéssemos no pré-treino.
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code')
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    const erro = params.get('error')
+    if (erro) setSpotifyErroLogin(`O Spotify recusou a autorização: ${erro}`)
     if (!code) return
     processarCallback(code)
-      .then((ok) => {
-        if (ok) setSpotifyConectado(true)
+      .then(() => {
+        setSpotifyConectado(true)
+        setSpotifyErroLogin(null)
+      })
+      .catch((e: unknown) => {
+        setSpotifyErroLogin(e instanceof Error ? e.message : 'Falha ao conectar ao Spotify.')
       })
       .finally(() => {
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -100,6 +108,7 @@ export default function App() {
           perfil={perfil}
           ajustes={ajustes}
           spotifyConectado={spotifyConectado}
+          spotifyErroLogin={spotifyErroLogin}
           aoMudarAjustes={mudarAjustes}
           aoMudarNivel={mudarNivel}
           aoComecar={comecarTreino}

@@ -11,6 +11,7 @@ interface Props {
   perfil: Perfil
   ajustes: Ajustes
   spotifyConectado: boolean
+  spotifyErroLogin: string | null
   aoMudarAjustes: (a: Ajustes) => void
   aoMudarNivel: (n: Nivel) => void
   aoComecar: () => void
@@ -26,7 +27,7 @@ const OBJETOS: { id: Equipamento; rotulo: string }[] = [
 ]
 const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘' }
 
-export default function PreWorkout({ perfil, ajustes, spotifyConectado, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
+export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyErroLogin, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
   const materiais = useMemo(() => materiaisDoTreino(treino), [treino])
   const [linkSpotify, setLinkSpotify] = useState('')
@@ -168,6 +169,7 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, aoMudarA
                 <button className="btn-spotify-conectar" onClick={conectarSpotify} disabled={conectandoSpotify}>
                   {conectandoSpotify ? '⏳ Conectando...' : '🔗 Conectar ao Spotify'}
                 </button>
+                {spotifyErroLogin && <small className="nota nota-erro">⚠️ {spotifyErroLogin}</small>}
                 <small className="nota">
                   Precisa de conta Premium. Ao clicar, você logará e voltará para cá automaticamente.
                 </small>
