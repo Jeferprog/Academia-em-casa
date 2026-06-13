@@ -172,9 +172,9 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
               </small>
             )}
             <small className="nota">
-              O player do Spotify aparece na tela do treino: toque o ▶ dele ao começar. Para ouvir
-              as músicas completas, esteja logado no Spotify; sem login tocam prévias. Precisa de
-              internet.
+              Na tela do treino, toque em <strong>"Abrir no Spotify"</strong>: sua playlist abre no
+              app do Spotify (onde você já está logado) tocando as músicas completas, e continua
+              tocando enquanto você volta para cá e treina. Precisa de internet.
             </small>
           </>
         )}

@@ -235,13 +235,26 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       </footer>
 
       {usaSpotify && musicaOn && (
-        <iframe
-          className="spotify-embed"
-          src={`https://open.spotify.com/embed/${ajustes.spotifyPlaylist}?utm_source=generator&theme=0`}
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-          title="Player do Spotify"
-        />
+        <div className="spotify-area">
+          <a
+            className="btn-spotify"
+            href={`https://open.spotify.com/${ajustes.spotifyPlaylist}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🟢 Abrir no Spotify (música completa) ↗
+          </a>
+          <details className="spotify-detalhe">
+            <summary>ou tocar uma prévia aqui</summary>
+            <iframe
+              className="spotify-embed"
+              src={`https://open.spotify.com/embed/${ajustes.spotifyPlaylist}?utm_source=generator&theme=0`}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              title="Player do Spotify"
+            />
+          </details>
+        </div>
       )}
     </div>
   )
