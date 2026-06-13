@@ -98,14 +98,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
 
     const iniciar = async () => {
       try {
-        const ok = await spotifyPlayer.inicializarPlayer()
-        if (ok) {
-          await new Promise((r) => setTimeout(r, 500))
+        const res = await spotifyPlayer.inicializarPlayer()
+        if (res.ok) {
           const tocou = await spotifyPlayer.tocarMusica(ajustes.spotifyPlaylist)
           if (tocou) setSpotifyPronto(true)
-          else setSpotifyErro('Erro ao tocar música')
+          else setSpotifyErro('Conectado, mas não consegui iniciar a playlist.')
         } else {
-          setSpotifyErro('Spotify Premium necessário — verifique a conexão')
+          setSpotifyErro(res.erro ?? 'Não foi possível iniciar o Spotify.')
         }
       } catch (e) {
         setSpotifyErro(`Erro: ${e instanceof Error ? e.message : 'desconhecido'}`)
