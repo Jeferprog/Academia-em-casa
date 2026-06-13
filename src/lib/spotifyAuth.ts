@@ -5,7 +5,7 @@
 // ficar no código — assim funciona no GitHub Pages sem configuração extra.
 const SPOTIFY_CLIENT_ID =
   import.meta.env.VITE_SPOTIFY_CLIENT_ID || '8d1bb28f318149b1aff9847882b2e65e'
-const SPOTIFY_REDIRECT_URI = 'https://jeferprog.github.io/Acadamia-em-casa/'
+const SPOTIFY_REDIRECT_URI = 'https://jeferprog.github.io/Academia-em-casa/'
 const SPOTIFY_AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize'
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1'
 

@@ -1,7 +1,7 @@
 {
-  "name": "Academia em Casa",
-  "short_name": "Academia",
-  "description": "Treinos em casa para iniciantes, sem aparelhos. Treine em família!",
+  "name": "MexeJunto",
+  "short_name": "MexeJunto",
+  "description": "MexeJunto: treinos em casa para iniciantes, sem aparelhos. Treine em família!",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

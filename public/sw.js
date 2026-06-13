@@ -1,5 +1,5 @@
 // Service worker: deixa o app funcionar offline depois da primeira visita.
-const CACHE = 'academia-em-casa-v1'
+const CACHE = 'mexejunto-v2'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./'])))

@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react'
 
 // Base = nome do repositório, para funcionar no GitHub Pages
 export default defineConfig({
-  base: '/Acadamia-em-casa/',
+  base: '/Academia-em-casa/',
   plugins: [react()],
 })

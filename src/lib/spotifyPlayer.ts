@@ -42,7 +42,7 @@ export async function inicializarPlayer(): Promise<boolean> {
     }
 
     player = new Spotify.Player({
-      name: 'Academia em Casa',
+      name: 'MexeJunto',
       getOAuthToken: async (cb: (token: string) => void) => {
         const t = await obterAccessToken()
         if (t) cb(t)
