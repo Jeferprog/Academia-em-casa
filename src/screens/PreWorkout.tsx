@@ -115,7 +115,7 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
       </div>
 
       <div className="cartao">
-        <h3>🔊 Som e voz</h3>
+        <h3>🔊 Som, voz e música</h3>
         <div className="chips">
           <button className={`chip ${ajustes.somLigado ? 'ativo' : ''}`} onClick={() => muda({ somLigado: !ajustes.somLigado })}>
             {ajustes.somLigado ? '🔔 Bipes ligados' : '🔕 Bipes desligados'}
@@ -123,7 +123,14 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
           <button className={`chip ${ajustes.vozLigada ? 'ativo' : ''}`} onClick={() => muda({ vozLigada: !ajustes.vozLigada })}>
             {ajustes.vozLigada ? '🗣 Voz ligada' : '🤐 Voz desligada'}
           </button>
+          <button className={`chip ${ajustes.musicaLigada ? 'ativo' : ''}`} onClick={() => muda({ musicaLigada: !ajustes.musicaLigada })}>
+            {ajustes.musicaLigada ? '🎵 Música ligada' : '🔇 Música desligada'}
+          </button>
         </div>
+        <small className="nota">
+          A música é gerada pelo próprio app: animada no circuito, suave no alongamento — e
+          abaixa sozinha quando a voz fala.
+        </small>
       </div>
 
       <div className="cartao">

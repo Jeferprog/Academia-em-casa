@@ -5,6 +5,7 @@ import Avatar from '../avatar/Avatar'
 import { fraseAleatoria } from '../data/phrases'
 import { bipeContagem, bipeTroca, falar, silenciarVoz, somVitoria } from '../lib/audio'
 import type { Treino } from '../lib/generator'
+import { iniciarMusica, pararMusica, type EstiloMusica } from '../lib/music'
 import type { Ajustes, Perfil } from '../lib/storage'
 
 interface Props {
@@ -15,6 +16,11 @@ interface Props {
 }
 
 const NOME_BLOCO = { aquecimento: 'Aquecimento', circuito: 'Treino', alongamento: 'Alongamento' }
+const ESTILO_BLOCO: Record<string, EstiloMusica> = {
+  aquecimento: 'leve',
+  circuito: 'energia',
+  alongamento: 'calma',
+}
 
 export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) {
   const { etapas } = treino
@@ -22,6 +28,7 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   const [msRestante, setMsRestante] = useState(etapas[0].segundos * 1000)
   const [pausado, setPausado] = useState(false)
   const [modoFacil, setModoFacil] = useState(false)
+  const [musicaOn, setMusicaOn] = useState(ajustes.musicaLigada)
   const [frase, setFrase] = useState<string | null>(null)
   const ultimoBipeRef = useRef(0)
   const falouRetaFinalRef = useRef(false)
@@ -54,6 +61,16 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Trilha de academia: clima muda conforme o bloco do treino
+  useEffect(() => {
+    if (!musicaOn || pausado) {
+      pararMusica()
+      return
+    }
+    iniciarMusica(ESTILO_BLOCO[etapa.bloco])
+    return pararMusica
+  }, [musicaOn, pausado, etapa.bloco])
 
   // Cronômetro regressivo
   useEffect(() => {
@@ -135,6 +152,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
         <span className="treino-contagem">
           Exercício {numExercicio}/{treino.totalExercicios}
         </span>
+        <button
+          className="btn-fechar"
+          onClick={() => setMusicaOn((v) => !v)}
+          aria-label={musicaOn ? 'Desligar música' : 'Ligar música'}
+        >
+          {musicaOn ? '🎵' : '🔇'}
+        </button>
         <button className="btn-fechar" onClick={sair} aria-label="Encerrar treino">
           ✕
         </button>

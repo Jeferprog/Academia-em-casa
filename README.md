@@ -14,6 +14,7 @@ família — você e quem treina com você.
 - ✅ Cronômetro regressivo ajustável (tempo de exercício e de descanso) com bipes
 - ✅ Avatar animado demonstrando cada movimento
 - ✅ Frases de incentivo na tela e faladas em português (voz do navegador)
+- ✅ Música de academia gerada pelo próprio app (Web Audio): animada no circuito, suave no alongamento, e abaixa sozinha quando a voz fala
 - ✅ Botão "Tá difícil" que troca na hora pela versão mais leve do exercício
 - ✅ Sequência de dias (streak), calendário e conquistas — salvos no aparelho
 - ✅ Funciona offline depois da primeira visita (PWA) e pode ser instalado na tela inicial

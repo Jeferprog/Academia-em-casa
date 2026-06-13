@@ -178,20 +178,21 @@ Casal            { perfis[2], conquistasDeDupla[], desafioDaSemana }
 
 ## 6. Fases de Desenvolvimento
 
-### 🟢 Fase 1 — MVP "Já dá pra treinar" (primeira entrega)
-- [ ] Estrutura do projeto (React + Vite + Tailwind + PWA)
-- [ ] Banco inicial de ~25 exercícios sem aparelho (com variações fácil/médio/difícil)
-- [ ] Gerador de treino por tempo disponível (10/15/20/30 min) com aquecimento e alongamento
-- [ ] Tela de treino com cronômetro regressivo ajustável + sons
-- [ ] Demonstração dos exercícios (animações Lottie/GIF)
-- [ ] Frases de incentivo (texto na tela + voz pt-BR via Web Speech)
-- [ ] Salvamento do progresso no aparelho + streak
-- [ ] Deploy no GitHub Pages
+### 🟢 Fase 1 — MVP "Já dá pra treinar" ✅ CONCLUÍDA
+- [x] Estrutura do projeto (React + Vite + PWA)
+- [x] Banco inicial de 28 exercícios sem aparelho (com variações fácil/médio/difícil)
+- [x] Gerador de treino por tempo disponível (7/10/15/20/30 min) com aquecimento e alongamento
+- [x] Tela de treino com cronômetro regressivo ajustável + sons
+- [x] Demonstração dos exercícios (avatar SVG animado por código, sem dependências)
+- [x] Frases de incentivo (texto na tela + voz pt-BR via Web Speech)
+- [x] Música de academia gerada no aparelho (antecipada da Fase 2): trilha eletrônica via Web Audio com 3 climas (aquecimento/circuito/alongamento) e ducking quando a voz fala
+- [x] Salvamento do progresso no aparelho + streak
+- [x] Deploy no GitHub Pages
 
 ### 🟡 Fase 2 — "Treinando junto"
 - [ ] Perfis do casal + conquistas de dupla + modo revezamento
 - [ ] Programa progressivo de 8 semanas
-- [ ] Música integrada (playlists royalty-free com ducking)
+- [x] ~~Música integrada~~ → antecipada para a Fase 1 (trilha gerada no aparelho)
 - [ ] Exercícios com objetos da casa
 - [ ] Calendário, gráficos e registro de peso
 - [ ] Lembrete diário (notificação)

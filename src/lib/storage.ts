@@ -16,6 +16,7 @@ export interface Ajustes {
   segDescanso: number
   somLigado: boolean
   vozLigada: boolean
+  musicaLigada: boolean
   equipamentos: Equipamento[]
 }
 
@@ -36,6 +37,7 @@ export const AJUSTES_PADRAO: Ajustes = {
   segDescanso: 20,
   somLigado: true,
   vozLigada: true,
+  musicaLigada: true,
   equipamentos: ['nenhum', 'parede', 'cadeira', 'garrafas'],
 }
 
