@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { gerarTreino, type Treino } from './lib/generator'
+import { estaConectado, processarCallback } from './lib/spotifyAuth'
 import {
   conquistas,
   gravarAjustes,
@@ -23,13 +24,34 @@ import Workout from './screens/Workout'
 
 type Tela = 'setup' | 'home' | 'pre' | 'treino' | 'fim' | 'biblioteca'
 
+// Há um código de retorno do login do Spotify na URL? (?code=...)
+const temCodigoSpotify = new URLSearchParams(window.location.search).has('code')
+
 export default function App() {
   const [perfil, setPerfil] = useState<Perfil | null>(() => lerPerfil())
   const [ajustes, setAjustes] = useState<Ajustes>(() => lerAjustes())
-  const [tela, setTela] = useState<Tela>(perfil ? 'home' : 'setup')
+  // Se voltamos do login do Spotify, abrir direto no pré-treino.
+  const [tela, setTela] = useState<Tela>(
+    !perfil ? 'setup' : temCodigoSpotify ? 'pre' : 'home',
+  )
   const [treino, setTreino] = useState<Treino | null>(null)
   const [novasConquistas, setNovasConquistas] = useState<Conquista[]>([])
   const [resumo, setResumo] = useState({ minutos: 0, exercicios: 0 })
+  const [spotifyConectado, setSpotifyConectado] = useState(() => estaConectado())
+
+  // Processa o retorno do login do Spotify logo na abertura do app, qualquer
+  // que seja a tela — antes só funcionava se já estivéssemos no pré-treino.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code')
+    if (!code) return
+    processarCallback(code)
+      .then((ok) => {
+        if (ok) setSpotifyConectado(true)
+      })
+      .finally(() => {
+        window.history.replaceState({}, document.title, window.location.pathname)
+      })
+  }, [])
 
   function concluirSetup(p: Perfil) {
     gravarPerfil(p)
@@ -77,6 +99,7 @@ export default function App() {
         <PreWorkout
           perfil={perfil}
           ajustes={ajustes}
+          spotifyConectado={spotifyConectado}
           aoMudarAjustes={mudarAjustes}
           aoMudarNivel={mudarNivel}
           aoComecar={comecarTreino}

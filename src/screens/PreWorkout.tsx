@@ -1,15 +1,16 @@
 // Pré-treino: escolha do tempo, ajustes do cronômetro, objetos da casa
 // disponíveis e prévia da sequência gerada para hoje.
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { EQUIP_INFO, type Equipamento } from '../data/exercises'
 import { gerarTreino, materiaisDoTreino } from '../lib/generator'
-import { estaConectado, obterURLLogin } from '../lib/spotifyAuth'
+import { obterURLLogin } from '../lib/spotifyAuth'
 import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
 interface Props {
   perfil: Perfil
   ajustes: Ajustes
+  spotifyConectado: boolean
   aoMudarAjustes: (a: Ajustes) => void
   aoMudarNivel: (n: Nivel) => void
   aoComecar: () => void
@@ -25,31 +26,13 @@ const OBJETOS: { id: Equipamento; rotulo: string }[] = [
 ]
 const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘' }
 
-export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
+export default function PreWorkout({ perfil, ajustes, spotifyConectado, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
   const materiais = useMemo(() => materiaisDoTreino(treino), [treino])
   const [linkSpotify, setLinkSpotify] = useState('')
   const [linkInvalido, setLinkInvalido] = useState(false)
-  const [spotifyConectado, setSpotifyConectado] = useState(estaConectado())
   const [conectandoSpotify, setConectandoSpotify] = useState(false)
   const exercicios = treino.etapas.filter((e) => e.tipo === 'exercicio')
-
-  // Verifica se voltou do login do Spotify
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-    if (code) {
-      import('../lib/spotifyAuth').then(async (auth) => {
-        const ok = await auth.processarCallback(code)
-        if (ok) {
-          setSpotifyConectado(true)
-          // Limpa a URL
-          window.history.replaceState({}, document.title, window.location.pathname)
-        }
-        setConectandoSpotify(false)
-      })
-    }
-  }, [])
 
   const muda = (parcial: Partial<Ajustes>) => aoMudarAjustes({ ...ajustes, ...parcial })
 
