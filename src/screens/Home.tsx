@@ -36,7 +36,7 @@ export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca }: Props) {
     <div className="tela home">
       <header className="home-topo">
         <h1 className="logo">
-          🏠💪 Academia <span>em Casa</span>
+          🏠💪 Mexe<span>Junto</span>
         </h1>
         <p className="saudacao">Olá, {saudacao}! 👋</p>
       </header>

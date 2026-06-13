@@ -21,7 +21,7 @@ export default function Setup({ aoConcluir }: Props) {
   return (
     <div className="tela setup">
       <h1 className="logo">
-        🏠💪 Academia <span>em Casa</span>
+        🏠💪 Mexe<span>Junto</span>
       </h1>
       <p className="subtitulo">
         Treinos para quem está começando, sem aparelhos, no conforto de casa — sozinho ou em
