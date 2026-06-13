@@ -174,7 +174,9 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
             <small className="nota">
               Na tela do treino, toque em <strong>"Abrir no Spotify"</strong>: sua playlist abre no
               app do Spotify (onde você já está logado) tocando as músicas completas, e continua
-              tocando enquanto você volta para cá e treina. Precisa de internet.
+              tocando enquanto você volta para cá e treina. Precisa de internet. Como a música fica
+              no app do Spotify, o celular <strong>vibra</strong> na contagem e na troca de
+              exercício para você não perder o ritmo.
             </small>
           </>
         )}

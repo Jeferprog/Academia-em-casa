@@ -180,7 +180,7 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           )}
         </div>
 
-        <div className="cronometro">
+        <div className={`cronometro ${seg <= 3 && !pausado ? 'contagem-final' : ''}`}>
           <svg viewBox="0 0 120 120" className="anel">
             <circle cx="60" cy="60" r="54" className="anel-fundo" />
             <circle
@@ -192,7 +192,9 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
               strokeDashoffset={CIRC * (1 - fracao)}
             />
           </svg>
-          <div className="cronometro-num">{seg}</div>
+          <div className="cronometro-num" key={seg}>
+            {seg}
+          </div>
         </div>
       </main>
 
