@@ -5,6 +5,15 @@ export type Categoria = 'aquecimento' | 'cardio' | 'pernas' | 'superiores' | 'co
 export type Equipamento = 'nenhum' | 'cadeira' | 'garrafas' | 'parede' | 'escada'
 export type Impacto = 'baixo' | 'medio' | 'alto'
 
+/** Nome amigável e emoji de cada material, para a lista de "o que separar". */
+export const EQUIP_INFO: Record<Equipamento, { rotulo: string; emoji: string }> = {
+  nenhum: { rotulo: 'Só o peso do corpo', emoji: '💪' },
+  parede: { rotulo: 'Uma parede livre', emoji: '🧱' },
+  cadeira: { rotulo: 'Uma cadeira firme', emoji: '🪑' },
+  garrafas: { rotulo: '2 garrafas com água (halteres)', emoji: '🍶' },
+  escada: { rotulo: 'Uma escada ou degrau', emoji: '🪜' },
+}
+
 export interface Exercicio {
   id: string
   nome: string

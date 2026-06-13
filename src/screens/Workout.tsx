@@ -6,6 +6,7 @@ import { fraseAleatoria } from '../data/phrases'
 import { bipeContagem, bipeTroca, falar, silenciarVoz, somVitoria } from '../lib/audio'
 import type { Treino } from '../lib/generator'
 import { iniciarMusica, pararMusica, type EstiloMusica } from '../lib/music'
+import * as spotifyPlayer from '../lib/spotifyPlayer'
 import type { Ajustes, Perfil } from '../lib/storage'
 
 interface Props {
@@ -26,18 +27,33 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   const { etapas } = treino
   const [indice, setIndice] = useState(0)
   const [msRestante, setMsRestante] = useState(etapas[0].segundos * 1000)
+  const [msTotal, setMsTotal] = useState(etapas[0].segundos * 1000)
   const [pausado, setPausado] = useState(false)
   const [modoFacil, setModoFacil] = useState(false)
   const [musicaOn, setMusicaOn] = useState(ajustes.musicaLigada)
   const [frase, setFrase] = useState<string | null>(null)
+  const [segDescanso, setSegDescanso] = useState(ajustes.segDescanso)
+  const [spotifyPronto, setSpotifyPronto] = useState(false)
+  const [spotifyErro, setSpotifyErro] = useState<string | null>(null)
   const ultimoBipeRef = useRef(0)
   const falouRetaFinalRef = useRef(false)
+  const falouRespiraRef = useRef(false)
   const fraseTimerRef = useRef<number | undefined>(undefined)
+  const spotifyIniciadoRef = useRef(false)
 
   const etapa = etapas[indice]
   const ehExercicio = etapa.tipo === 'exercicio'
   const proxExercicio = etapas.slice(indice + 1).find((e) => e.tipo === 'exercicio')
   const numExercicio = etapas.slice(0, indice + 1).filter((e) => e.tipo === 'exercicio').length
+  // Próximos exercícios (até 3) para mostrar a sequência durante o treino
+  const proximos = etapas
+    .slice(indice + 1)
+    .filter((e) => e.tipo === 'exercicio')
+    .slice(0, 3)
+
+  // Durante o descanso o avatar já demonstra o PRÓXIMO exercício; no exercício,
+  // demonstra o atual. Em ambos os casos a animação continua rodando.
+  const exibido = ehExercicio ? etapa.exercicio : proxExercicio?.exercicio ?? etapa.exercicio
 
   const diz = (texto: string) => {
     if (ajustes.vozLigada) falar(texto)
@@ -74,6 +90,41 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     return pararMusica
   }, [musicaOn, pausado, etapa.bloco, usaSpotify])
 
+  // Inicializa Spotify Web Playback SDK
+  useEffect(() => {
+    if (!usaSpotify || !musicaOn || spotifyIniciadoRef.current) return
+
+    spotifyIniciadoRef.current = true
+
+    const iniciar = async () => {
+      try {
+        const ok = await spotifyPlayer.inicializarPlayer()
+        if (ok) {
+          await new Promise((r) => setTimeout(r, 500))
+          const tocou = await spotifyPlayer.tocarMusica(ajustes.spotifyPlaylist)
+          if (tocou) setSpotifyPronto(true)
+          else setSpotifyErro('Erro ao tocar música')
+        } else {
+          setSpotifyErro('Spotify Premium necessário — verifique a conexão')
+        }
+      } catch (e) {
+        setSpotifyErro(`Erro: ${e instanceof Error ? e.message : 'desconhecido'}`)
+      }
+    }
+
+    iniciar()
+    return () => {
+      spotifyPlayer.desconectar()
+    }
+  }, [usaSpotify, musicaOn, ajustes.spotifyPlaylist])
+
+  // Pausa/retoma música do Spotify junto com o treino
+  useEffect(() => {
+    if (!usaSpotify || !spotifyPronto) return
+    if (pausado) spotifyPlayer.pausarMusica().catch(() => {})
+    else spotifyPlayer.retomar().catch(() => {})
+  }, [pausado, usaSpotify, spotifyPronto])
+
   // Cronômetro regressivo
   useEffect(() => {
     if (pausado) return
@@ -102,6 +153,17 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       falouRetaFinalRef.current = true
       mostrarFrase(fraseAleatoria('retaFinal'))
     }
+    // Lembrete de respiração no meio de um exercício mais longo
+    if (
+      ehExercicio &&
+      !falouRespiraRef.current &&
+      msTotal >= 25000 &&
+      seg === Math.ceil(msTotal / 2000) &&
+      Math.random() < 0.5
+    ) {
+      falouRespiraRef.current = true
+      mostrarFrase(fraseAleatoria('respiracao'))
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msRestante])
 
@@ -113,18 +175,31 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       return
     }
     const nova = etapas[proximo]
+    // Descanso do circuito usa o valor ajustado ao vivo; pausa grande mantém o seu.
+    const segNova =
+      nova.tipo === 'descanso' && nova.bloco === 'circuito' && !nova.pausaGrande
+        ? segDescanso
+        : nova.segundos
     setIndice(proximo)
-    setMsRestante(nova.segundos * 1000)
+    setMsRestante(segNova * 1000)
+    setMsTotal(segNova * 1000)
     setModoFacil(false)
     ultimoBipeRef.current = 0
     falouRetaFinalRef.current = false
+    falouRespiraRef.current = false
     if (!pular && ajustes.somLigado) bipeTroca()
 
     if (nova.tipo === 'exercicio') {
       diz(nova.exercicio.nome)
+    } else if (nova.pausaGrande) {
+      const seguinte = etapas.slice(proximo + 1).find((e) => e.tipo === 'exercicio')
+      const msg = fraseAleatoria('pausaGrande')
+      mostrarFrase(msg, false)
+      diz(seguinte ? `${msg} Depois: ${seguinte.exercicio.nome}.` : msg)
     } else {
       const seguinte = etapas.slice(proximo + 1).find((e) => e.tipo === 'exercicio')
       diz(seguinte ? `Descanso. Próximo: ${seguinte.exercicio.nome}.` : 'Descanso.')
+      if (Math.random() < 0.5) mostrarFrase(fraseAleatoria('respiracao'), false)
     }
 
     // Frase da metade do treino (e incentivo de casal, se for o caso)
@@ -132,6 +207,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       const tipo = perfil.nomes.length > 1 && Math.random() < 0.5 ? 'casal' : 'metade'
       window.setTimeout(() => mostrarFrase(fraseAleatoria(tipo)), 2500)
     }
+  }
+
+  // Ajusta o descanso ao vivo: muda o que falta agora e os próximos descansos.
+  function ajustarDescanso(delta: number) {
+    setSegDescanso((v) => Math.max(5, Math.min(60, v + delta)))
+    setMsRestante((ms) => Math.max(1000, ms + delta * 1000))
+    setMsTotal((t) => Math.max(1000, t + delta * 1000))
   }
 
   function sair() {
@@ -142,10 +224,11 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   }
 
   const seg = Math.max(0, Math.ceil(msRestante / 1000))
-  const fracao = Math.max(0, msRestante / (etapa.segundos * 1000))
+  const fracao = msTotal > 0 ? Math.max(0, msRestante / msTotal) : 0
   const CIRC = 2 * Math.PI * 54
   const progresso = ((indice + 1) / etapas.length) * 100
   const variacao = modoFacil ? etapa.exercicio.variacoes.facil : etapa.exercicio.variacoes[perfil.nivel]
+  const ehPausaGrande = !ehExercicio && etapa.pausaGrande
 
   return (
     <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'}`}>
@@ -172,12 +255,10 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
 
       <main className="treino-centro">
         <div className="avatar-caixa">
-          <Avatar anim={etapa.exercicio.anim} rodando={!pausado && ehExercicio} className="avatar-svg" />
           {!ehExercicio && (
-            <div className="descanso-overlay">
-              <span>DESCANSO</span>
-            </div>
+            <span className="proximo-badge">{ehPausaGrande ? '🌬️ PAUSA' : '⏭ PRÓXIMO'}</span>
           )}
+          <Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />
         </div>
 
         <div className={`cronometro ${seg <= 3 && !pausado ? 'contagem-final' : ''}`}>
@@ -210,7 +291,7 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           </>
         ) : (
           <>
-            <h2>Respira… 😮‍💨</h2>
+            <h2>{ehPausaGrande ? 'Pausa para respirar 🌬️' : 'Respira… 😮‍💨'}</h2>
             {proxExercicio && (
               <p className="dica">
                 Próximo: <strong>{proxExercicio.exercicio.nome}</strong>
@@ -219,6 +300,17 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           </>
         )}
       </section>
+
+      {proximos.length > 0 && (
+        <section className="proximos">
+          <span className="proximos-titulo">A seguir</span>
+          <ol className="proximos-lista">
+            {proximos.map((e, i) => (
+              <li key={`${e.exercicio.id}-${i}`}>{e.exercicio.nome}</li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {frase && <div className="frase-incentivo">💬 {frase}</div>}
 
@@ -231,6 +323,17 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
             😅 Tá difícil
           </button>
         )}
+        {!ehExercicio && (
+          <div className="ajuste-descanso">
+            <button onClick={() => ajustarDescanso(-5)} aria-label="Menos descanso">
+              −
+            </button>
+            <span>descanso {segDescanso}s</span>
+            <button onClick={() => ajustarDescanso(5)} aria-label="Mais descanso">
+              +
+            </button>
+          </div>
+        )}
         <button className="btn-controle" onClick={() => avancar(true)}>
           ⏭ Pular
         </button>
@@ -238,24 +341,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
 
       {usaSpotify && musicaOn && (
         <div className="spotify-area">
-          <a
-            className="btn-spotify"
-            href={`https://open.spotify.com/${ajustes.spotifyPlaylist}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            🟢 Abrir no Spotify (música completa) ↗
-          </a>
-          <details className="spotify-detalhe">
-            <summary>ou tocar uma prévia aqui</summary>
-            <iframe
-              className="spotify-embed"
-              src={`https://open.spotify.com/embed/${ajustes.spotifyPlaylist}?utm_source=generator&theme=0`}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              title="Player do Spotify"
-            />
-          </details>
+          {spotifyErro ? (
+            <div className="nota nota-erro">⚠️ {spotifyErro}</div>
+          ) : spotifyPronto ? (
+            <div className="nota">🎵 Spotify tocando com volume controlado automaticamente</div>
+          ) : (
+            <div className="nota">⏳ Iniciando Spotify...</div>
+          )}
         </div>
       )}
     </div>

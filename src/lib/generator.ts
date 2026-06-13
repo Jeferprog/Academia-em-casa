@@ -4,11 +4,24 @@
 import { EXERCICIOS, type Equipamento, type Exercicio } from '../data/exercises'
 import type { Ajustes, Nivel } from './storage'
 
+/** Materiais (objetos da casa) que os exercícios de hoje vão usar. */
+export function materiaisDoTreino(treino: Treino): Equipamento[] {
+  const usados = new Set<Equipamento>()
+  for (const e of treino.etapas) {
+    if (e.tipo === 'exercicio' && e.exercicio.equipamento !== 'nenhum') {
+      usados.add(e.exercicio.equipamento)
+    }
+  }
+  return [...usados]
+}
+
 export interface Etapa {
   tipo: 'exercicio' | 'descanso'
   exercicio: Exercicio
   segundos: number
   bloco: 'aquecimento' | 'circuito' | 'alongamento'
+  /** descanso prolongado no meio dos treinos longos (20/30 min) */
+  pausaGrande?: boolean
 }
 
 export interface Treino {
@@ -78,9 +91,22 @@ export function gerarTreino(ajustes: Ajustes, nivel: Nivel): Treino {
     etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: 30, bloco: 'aquecimento' })
     etapas.push({ tipo: 'descanso', exercicio: ex, segundos: 10, bloco: 'aquecimento' })
   }
+  // Treinos longos (20+ min) ganham uma pausa maior no meio do circuito:
+  // dura o mesmo tempo de um exercício, mas é só descanso para recuperar o fôlego.
+  const temPausaGrande = ajustes.minutos >= 20 && circuito.length >= 4
+  const idxPausaGrande = temPausaGrande ? Math.floor(circuito.length / 2) - 1 : -1
+
   circuito.forEach((ex, i) => {
     etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: ajustes.segExercicio, bloco: 'circuito' })
-    if (i < circuito.length - 1) {
+    if (i === idxPausaGrande) {
+      etapas.push({
+        tipo: 'descanso',
+        exercicio: ex,
+        segundos: ajustes.segExercicio,
+        bloco: 'circuito',
+        pausaGrande: true,
+      })
+    } else if (i < circuito.length - 1) {
       etapas.push({ tipo: 'descanso', exercicio: ex, segundos: ajustes.segDescanso, bloco: 'circuito' })
     }
   })
