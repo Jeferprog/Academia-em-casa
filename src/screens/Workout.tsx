@@ -6,6 +6,7 @@ import { fraseAleatoria } from '../data/phrases'
 import { bipeContagem, bipeTroca, falar, silenciarVoz, somVitoria } from '../lib/audio'
 import type { Treino } from '../lib/generator'
 import { iniciarMusica, pararMusica, type EstiloMusica } from '../lib/music'
+import * as spotifyPlayer from '../lib/spotifyPlayer'
 import type { Ajustes, Perfil } from '../lib/storage'
 
 interface Props {
@@ -30,9 +31,12 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   const [modoFacil, setModoFacil] = useState(false)
   const [musicaOn, setMusicaOn] = useState(ajustes.musicaLigada)
   const [frase, setFrase] = useState<string | null>(null)
+  const [spotifyPronto, setSpotifyPronto] = useState(false)
+  const [spotifyErro, setSpotifyErro] = useState<string | null>(null)
   const ultimoBipeRef = useRef(0)
   const falouRetaFinalRef = useRef(false)
   const fraseTimerRef = useRef<number | undefined>(undefined)
+  const spotifyIniciadoRef = useRef(false)
 
   const etapa = etapas[indice]
   const ehExercicio = etapa.tipo === 'exercicio'
@@ -73,6 +77,49 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     iniciarMusica(ESTILO_BLOCO[etapa.bloco])
     return pararMusica
   }, [musicaOn, pausado, etapa.bloco, usaSpotify])
+
+  // Inicializa Spotify Web Playback SDK
+  useEffect(() => {
+    if (!usaSpotify || !musicaOn || spotifyIniciadoRef.current) return
+
+    spotifyIniciadoRef.current = true
+
+    const iniciar = async () => {
+      try {
+        const ok = await spotifyPlayer.inicializarPlayer()
+        if (ok) {
+          // Aguarda um pouco para garantir que o player está pronto
+          await new Promise((r) => setTimeout(r, 500))
+          const tocou = await spotifyPlayer.tocarMusica(ajustes.spotifyPlaylist)
+          if (tocou) {
+            setSpotifyPronto(true)
+          } else {
+            setSpotifyErro('Erro ao tocar música')
+          }
+        } else {
+          setSpotifyErro('Spotify Premium necessário — verifique a conexão')
+        }
+      } catch (e) {
+        setSpotifyErro(`Erro: ${e instanceof Error ? e.message : 'desconhecido'}`)
+      }
+    }
+
+    iniciar()
+
+    return () => {
+      spotifyPlayer.desconectar()
+    }
+  }, [usaSpotify, musicaOn, ajustes.spotifyPlaylist])
+
+  // Pausa/retoma música do Spotify junto com o treino
+  useEffect(() => {
+    if (!usaSpotify || !spotifyPronto) return
+    if (pausado) {
+      spotifyPlayer.pausarMusica().catch(() => {})
+    } else {
+      spotifyPlayer.retomar().catch(() => {})
+    }
+  }, [pausado, usaSpotify, spotifyPronto])
 
   // Cronômetro regressivo
   useEffect(() => {
@@ -238,24 +285,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
 
       {usaSpotify && musicaOn && (
         <div className="spotify-area">
-          <a
-            className="btn-spotify"
-            href={`https://open.spotify.com/${ajustes.spotifyPlaylist}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            🟢 Abrir no Spotify (música completa) ↗
-          </a>
-          <details className="spotify-detalhe">
-            <summary>ou tocar uma prévia aqui</summary>
-            <iframe
-              className="spotify-embed"
-              src={`https://open.spotify.com/embed/${ajustes.spotifyPlaylist}?utm_source=generator&theme=0`}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              title="Player do Spotify"
-            />
-          </details>
+          {spotifyErro ? (
+            <div className="nota nota-erro">⚠️ {spotifyErro}</div>
+          ) : spotifyPronto ? (
+            <div className="nota">🎵 Spotify tocando com volume controlado automaticamente</div>
+          ) : (
+            <div className="nota">⏳ Iniciando Spotify...</div>
+          )}
         </div>
       )}
     </div>

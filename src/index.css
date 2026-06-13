@@ -362,7 +362,8 @@ button {
 
 .spotify-area { display: flex; flex-direction: column; gap: 8px; }
 
-.btn-spotify {
+.btn-spotify,
+.btn-spotify-conectar {
   display: block;
   text-align: center;
   text-decoration: none;
@@ -373,8 +374,12 @@ button {
   padding: 15px;
   font-size: 1rem;
   box-shadow: 0 4px 16px rgba(29, 185, 84, 0.35);
+  border: none;
+  cursor: pointer;
 }
-.btn-spotify:active { transform: scale(0.98); }
+.btn-spotify:active,
+.btn-spotify-conectar:active { transform: scale(0.98); }
+.btn-spotify-conectar:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .spotify-detalhe summary {
   color: var(--texto2);

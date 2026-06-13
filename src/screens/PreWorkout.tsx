@@ -1,9 +1,10 @@
 // Pré-treino: escolha do tempo, ajustes do cronômetro, objetos da casa
 // disponíveis e prévia da sequência gerada para hoje.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Equipamento } from '../data/exercises'
 import { gerarTreino } from '../lib/generator'
+import { estaConectado, obterURLLogin } from '../lib/spotifyAuth'
 import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
 interface Props {
@@ -28,7 +29,26 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
   const [linkSpotify, setLinkSpotify] = useState('')
   const [linkInvalido, setLinkInvalido] = useState(false)
+  const [spotifyConectado, setSpotifyConectado] = useState(estaConectado())
+  const [conectandoSpotify, setConectandoSpotify] = useState(false)
   const exercicios = treino.etapas.filter((e) => e.tipo === 'exercicio')
+
+  // Verifica se voltou do login do Spotify
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (code) {
+      import('../lib/spotifyAuth').then(async (auth) => {
+        const ok = await auth.processarCallback(code)
+        if (ok) {
+          setSpotifyConectado(true)
+          // Limpa a URL
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }
+        setConectandoSpotify(false)
+      })
+    }
+  }, [])
 
   const muda = (parcial: Partial<Ajustes>) => aoMudarAjustes({ ...ajustes, ...parcial })
 
@@ -39,6 +59,13 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
         ? ajustes.equipamentos.filter((e) => e !== id)
         : [...ajustes.equipamentos, id],
     })
+  }
+
+  const conectarSpotify = async () => {
+    setConectandoSpotify(true)
+    const url = await obterURLLogin()
+    // Abre em nova aba; quando o usuário fizer login, voltará para cá com o code na URL
+    window.location.href = url
   }
 
   return (
@@ -152,32 +179,43 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
         </div>
         {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && (
           <>
-            <label className="campo campo-spotify">
-              Cole o link da sua playlist <small>(opcional)</small>
-              <input
-                value={linkSpotify}
-                onChange={(e) => {
-                  setLinkSpotify(e.target.value)
-                  const caminho = parseSpotify(e.target.value)
-                  setLinkInvalido(e.target.value.trim() !== '' && !caminho)
-                  if (caminho) muda({ spotifyPlaylist: caminho })
-                }}
-                placeholder="https://open.spotify.com/playlist/..."
-                inputMode="url"
-              />
-            </label>
-            {linkInvalido && (
-              <small className="nota nota-erro">
-                Link não reconhecido — no Spotify, toque em Compartilhar → Copiar link da playlist.
-              </small>
+            {!spotifyConectado ? (
+              <>
+                <button className="btn-spotify-conectar" onClick={conectarSpotify} disabled={conectandoSpotify}>
+                  {conectandoSpotify ? '⏳ Conectando...' : '🔗 Conectar ao Spotify'}
+                </button>
+                <small className="nota">
+                  Precisa de conta Premium. Ao clicar, você logará e voltará para cá automaticamente.
+                </small>
+              </>
+            ) : (
+              <>
+                <label className="campo campo-spotify">
+                  Cole o link da sua playlist <small>(opcional)</small>
+                  <input
+                    value={linkSpotify}
+                    onChange={(e) => {
+                      setLinkSpotify(e.target.value)
+                      const caminho = parseSpotify(e.target.value)
+                      setLinkInvalido(e.target.value.trim() !== '' && !caminho)
+                      if (caminho) muda({ spotifyPlaylist: caminho })
+                    }}
+                    placeholder="https://open.spotify.com/playlist/..."
+                    inputMode="url"
+                  />
+                </label>
+                {linkInvalido && (
+                  <small className="nota nota-erro">
+                    Link não reconhecido — no Spotify, toque em Compartilhar → Copiar link da playlist.
+                  </small>
+                )}
+                <small className="nota">
+                  ✓ Conectado! A música toca dentro do app, com <strong>volume controlado automaticamente</strong>:
+                  abaixa quando o app fala (igual à trilha própria) e volta ao normal depois. Funciona offline
+                  se a playlist já foi sincronizada.
+                </small>
+              </>
             )}
-            <small className="nota">
-              Na tela do treino, toque em <strong>"Abrir no Spotify"</strong>: sua playlist abre no
-              app do Spotify (onde você já está logado) tocando as músicas completas, e continua
-              tocando enquanto você volta para cá e treina. Precisa de internet. Como a música fica
-              no app do Spotify, o celular <strong>vibra</strong> na contagem e na troca de
-              exercício para você não perder o ritmo.
-            </small>
           </>
         )}
         {ajustes.musicaLigada && ajustes.fonteMusica === 'app' && (

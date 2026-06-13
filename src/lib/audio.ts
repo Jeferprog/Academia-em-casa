@@ -2,7 +2,23 @@
 // (Web Speech API em pt-BR — grátis e funciona offline na maioria dos aparelhos).
 
 import { getCtx } from './audioCtx'
-import { abaixarMusica, restaurarMusica } from './music'
+import { abaixarMusica as abaixarApp, restaurarMusica as restaurarApp } from './music'
+
+async function abaixarMusica() {
+  abaixarApp()
+  try {
+    const { abaixarMusica: abaixarSpotify } = await import('./spotifyPlayer')
+    abaixarSpotify().catch(() => {})
+  } catch {}
+}
+
+async function restaurarMusica() {
+  restaurarApp()
+  try {
+    const { restaurarMusica: restaurarSpotify } = await import('./spotifyPlayer')
+    restaurarSpotify().catch(() => {})
+  } catch {}
+}
 
 // Tons mais "cortantes" (onda quadrada/triângulo) furam melhor o volume da
 // música do que uma onda senoidal suave.
@@ -86,7 +102,10 @@ export function falar(texto: string) {
 export function silenciarVoz() {
   try {
     if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel()
-    restaurarMusica()
+    restaurarApp()
+    try {
+      import('./spotifyPlayer').then(({ restaurarMusica: r }) => r().catch(() => {}))
+    } catch {}
   } catch {
     /* ignora */
   }
