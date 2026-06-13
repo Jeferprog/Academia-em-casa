@@ -35,8 +35,23 @@ function carregarSDK(): Promise<void> {
   })
 }
 
+// O Web Playback SDK do Spotify depende de DRM (Widevine/EME) que os
+// navegadores de celular não liberam para páginas web — então ele só toca
+// em desktop, mesmo com conta Premium. Detectamos para dar um aviso correto.
+function ehCelular(): boolean {
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+}
+
 // Inicializa o player Web Playback e espera ele ficar realmente pronto.
 export async function inicializarPlayer(): Promise<ResultadoPlayer> {
+  if (ehCelular()) {
+    return {
+      ok: false,
+      erro:
+        'O player do Spotify dentro do app só funciona em computador (o Spotify não libera isso em navegadores de celular). No celular, use a "🎹 Trilha do app" — ela também abaixa para a voz e funciona offline.',
+    }
+  }
+
   const token = await obterAccessToken()
   if (!token) return { ok: false, erro: 'Não conectado. Toque em "Conectar ao Spotify".' }
 
