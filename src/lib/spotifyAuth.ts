@@ -144,21 +144,35 @@ export async function obterAccessToken(): Promise<string | null> {
   }
 }
 
-// Verifica se o usuário tem Premium
-export async function temPremium(): Promise<boolean> {
-  const token = await obterAccessToken()
-  if (!token) return false
+export interface PerfilSpotify {
+  product: string // 'premium' | 'free' | 'open' ...
+  display_name: string
+  country: string
+}
 
+// Lê o perfil da conta logada (para saber o plano real que o Spotify reporta).
+export async function obterPerfilSpotify(): Promise<PerfilSpotify | null> {
+  const token = await obterAccessToken()
+  if (!token) return null
   try {
     const response = await fetch(`${SPOTIFY_API_BASE}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    if (!response.ok) return false
-    const user = (await response.json()) as { product: string }
-    return user.product === 'premium'
+    if (!response.ok) return null
+    const u = (await response.json()) as Partial<PerfilSpotify>
+    return {
+      product: u.product ?? 'desconhecido',
+      display_name: u.display_name ?? 'sua conta',
+      country: u.country ?? '',
+    }
   } catch {
-    return false
+    return null
   }
+}
+
+export async function temPremium(): Promise<boolean> {
+  const perfil = await obterPerfilSpotify()
+  return perfil?.product === 'premium'
 }
 
 export function estaConectado(): boolean {

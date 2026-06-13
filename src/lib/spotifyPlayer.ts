@@ -1,6 +1,6 @@
 // Wrapper do Spotify Web Playback SDK com volume ducking (abaixa quando voz fala)
 
-import { obterAccessToken } from './spotifyAuth'
+import { obterAccessToken, obterPerfilSpotify } from './spotifyAuth'
 
 export interface ResultadoPlayer {
   ok: boolean
@@ -95,20 +95,28 @@ export async function inicializarPlayer(): Promise<ResultadoPlayer> {
     })
 
     const conectado = await player!.connect()
-    if (!conectado) return { ok: false, erro: erroDetectado ?? 'Não foi possível conectar ao Spotify.' }
+    if (!conectado) return { ok: false, erro: await detalharErro(erroDetectado) }
 
     const pronto = await ficarPronto
-    if (!pronto) {
-      return {
-        ok: false,
-        erro: erroDetectado ?? 'O player não ficou pronto. Confirme que a conta é Premium.',
-      }
-    }
+    if (!pronto) return { ok: false, erro: await detalharErro(erroDetectado) }
 
     return { ok: true }
   } catch (e) {
     return { ok: false, erro: e instanceof Error ? e.message : 'Erro desconhecido' }
   }
+}
+
+// Quando o player falha, consulta o plano real da conta para dar um motivo
+// preciso (ex.: logou numa conta sem Premium).
+async function detalharErro(erroBase: string | null): Promise<string> {
+  const perfil = await obterPerfilSpotify()
+  if (perfil && perfil.product !== 'premium') {
+    return `A conta "${perfil.display_name}" está no plano "${perfil.product}", e o Web Player exige Premium. Confira se você logou na conta Premium certa (saia e conecte de novo).`
+  }
+  if (perfil && perfil.product === 'premium') {
+    return 'Sua conta é Premium, mas o navegador não conseguiu iniciar o player do Spotify (pode ser bloqueio de mídia/DRM). Tente outro navegador, como o Chrome.'
+  }
+  return erroBase ?? 'Não foi possível iniciar o Spotify.'
 }
 
 // Toca uma playlist/álbum no nosso device
