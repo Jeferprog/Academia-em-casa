@@ -1,17 +1,12 @@
 // Sons do cronômetro (Web Audio API — sem arquivos) e voz de incentivo
 // (Web Speech API em pt-BR — grátis e funciona offline na maioria dos aparelhos).
 
-let ctx: AudioContext | null = null
-
-function audioCtx(): AudioContext {
-  if (!ctx) ctx = new AudioContext()
-  if (ctx.state === 'suspended') void ctx.resume()
-  return ctx
-}
+import { getCtx } from './audioCtx'
+import { abaixarMusica, restaurarMusica } from './music'
 
 function tocarTom(freq: number, duracaoMs: number, volume = 0.25) {
   try {
-    const ac = audioCtx()
+    const ac = getCtx()
     const osc = ac.createOscillator()
     const gain = ac.createGain()
     osc.type = 'sine'
@@ -61,6 +56,10 @@ export function falar(texto: string) {
     u.lang = 'pt-BR'
     if (vozPt) u.voice = vozPt
     u.rate = 1.05
+    // a música abaixa enquanto a voz fala (ducking)
+    u.onstart = abaixarMusica
+    u.onend = restaurarMusica
+    u.onerror = restaurarMusica
     speechSynthesis.speak(u)
   } catch {
     // voz indisponível — frases continuam aparecendo na tela
@@ -70,6 +69,7 @@ export function falar(texto: string) {
 export function silenciarVoz() {
   try {
     if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel()
+    restaurarMusica()
   } catch {
     /* ignora */
   }
