@@ -2,8 +2,8 @@
 // disponíveis e prévia da sequência gerada para hoje.
 
 import { useEffect, useMemo, useState } from 'react'
-import type { Equipamento } from '../data/exercises'
-import { gerarTreino } from '../lib/generator'
+import { EQUIP_INFO, type Equipamento } from '../data/exercises'
+import { gerarTreino, materiaisDoTreino } from '../lib/generator'
 import { estaConectado, obterURLLogin } from '../lib/spotifyAuth'
 import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
@@ -27,6 +27,7 @@ const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘'
 
 export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
+  const materiais = useMemo(() => materiaisDoTreino(treino), [treino])
   const [linkSpotify, setLinkSpotify] = useState('')
   const [linkInvalido, setLinkInvalido] = useState(false)
   const [spotifyConectado, setSpotifyConectado] = useState(estaConectado())
@@ -223,6 +224,29 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
             Trilha gerada pelo próprio app: animada no circuito, suave no alongamento, abaixa
             quando a voz fala — e funciona offline.
           </small>
+        )}
+      </div>
+
+      <div className="cartao">
+        <h3>🎒 Separe antes de começar</h3>
+        {materiais.length === 0 ? (
+          <p className="material-item">
+            <span className="material-emoji">💪</span>
+            Nada! O treino de hoje é só com o peso do corpo.
+          </p>
+        ) : (
+          <ul className="lista-materiais">
+            <li className="material-item">
+              <span className="material-emoji">💧</span>
+              Uma garrafa de água para beber
+            </li>
+            {materiais.map((m) => (
+              <li key={m} className="material-item">
+                <span className="material-emoji">{EQUIP_INFO[m].emoji}</span>
+                {EQUIP_INFO[m].rotulo}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

@@ -36,6 +36,19 @@ export const FRASES = {
     'Casal que treina junto, fica forte junto!',
     'Um incentiva o outro, ninguém desiste!',
   ],
+  respiracao: [
+    'Respire fundo… e solte devagar.',
+    'Não esqueça da respiração!',
+    'Inspira pelo nariz, solta pela boca.',
+    'Mantenha a respiração no ritmo, sem prender.',
+    'Solta o ar na força, puxa no alívio.',
+    'Respira… está indo muito bem.',
+  ],
+  pausaGrande: [
+    'Pausa maior! Bebe água e respira fundo.',
+    'Descanso especial: recupere o fôlego com calma.',
+    'Aproveite essa pausa, vocês merecem. Respira fundo.',
+  ],
 }
 
 export function fraseAleatoria(tipo: keyof typeof FRASES): string {
