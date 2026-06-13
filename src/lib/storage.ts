@@ -3,6 +3,7 @@
 import type { Equipamento } from '../data/exercises'
 
 export type Nivel = 'facil' | 'medio' | 'dificil'
+export type FonteMusica = 'app' | 'spotify'
 
 export interface Perfil {
   nomes: string[] // 1 ou 2 nomes (treino em casal!)
@@ -17,6 +18,9 @@ export interface Ajustes {
   somLigado: boolean
   vozLigada: boolean
   musicaLigada: boolean
+  fonteMusica: FonteMusica
+  /** caminho do Spotify no formato "playlist/ID" (também aceita album/track) */
+  spotifyPlaylist: string
   equipamentos: Equipamento[]
 }
 
@@ -38,7 +42,19 @@ export const AJUSTES_PADRAO: Ajustes = {
   somLigado: true,
   vozLigada: true,
   musicaLigada: true,
+  fonteMusica: 'app',
+  // playlist "Beast Mode" do próprio Spotify como ponto de partida
+  spotifyPlaylist: 'playlist/37i9dQZF1DX76Wlfdnj7AP',
   equipamentos: ['nenhum', 'parede', 'cadeira', 'garrafas'],
+}
+
+/** Extrai "tipo/id" de um link ou URI do Spotify; null se não reconhecer. */
+export function parseSpotify(texto: string): string | null {
+  const url = texto.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/)
+  if (url) return `${url[1]}/${url[2]}`
+  const uri = texto.match(/spotify:(playlist|album|track|artist):([A-Za-z0-9]+)/)
+  if (uri) return `${uri[1]}/${uri[2]}`
+  return null
 }
 
 function ler<T>(chave: string): T | null {
