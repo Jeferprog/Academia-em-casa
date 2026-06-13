@@ -1,0 +1,489 @@
+// Banco de exercícios — todos sem aparelhos de academia,
+// alguns usam objetos comuns da casa (cadeira, garrafas PET, parede, escada).
+
+export type Categoria = 'aquecimento' | 'cardio' | 'pernas' | 'superiores' | 'core' | 'alongamento'
+export type Equipamento = 'nenhum' | 'cadeira' | 'garrafas' | 'parede' | 'escada'
+export type Impacto = 'baixo' | 'medio' | 'alto'
+
+export interface Exercicio {
+  id: string
+  nome: string
+  dica: string
+  musculos: string
+  categoria: Categoria
+  equipamento: Equipamento
+  impacto: Impacto
+  /** chave da animação do avatar (ver src/avatar/poses.ts) */
+  anim: string
+  variacoes: { facil: string; medio: string; dificil: string }
+}
+
+export const EXERCICIOS: Exercicio[] = [
+  // ─── AQUECIMENTO ───────────────────────────────────────────────
+  {
+    id: 'marcha-estacionaria',
+    nome: 'Marcha estacionária',
+    dica: 'Levante bem os joelhos e balance os braços no ritmo.',
+    musculos: 'Corpo todo',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'march',
+    variacoes: {
+      facil: 'Marche devagar, joelhos na altura confortável',
+      medio: 'Marche em ritmo médio, joelhos mais altos',
+      dificil: 'Marche rápido, joelhos na altura do quadril',
+    },
+  },
+  {
+    id: 'circulos-de-bracos',
+    nome: 'Círculos de braços',
+    dica: 'Braços esticados, faça círculos grandes e lentos.',
+    musculos: 'Ombros',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'arm-circles',
+    variacoes: {
+      facil: 'Círculos pequenos e lentos',
+      medio: 'Círculos grandes, alterne o sentido',
+      dificil: 'Círculos grandes e rápidos nos dois sentidos',
+    },
+  },
+  {
+    id: 'elevacao-calcanhares-aquecimento',
+    nome: 'Balanço de calcanhares',
+    dica: 'Suba na ponta dos pés e desça devagar, segure em algo se precisar.',
+    musculos: 'Panturrilhas',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'calf-raise',
+    variacoes: {
+      facil: 'Apoie a mão na parede para equilibrar',
+      medio: 'Sem apoio, suba e desça controlado',
+      dificil: 'Mais rápido, pausa de 1s lá em cima',
+    },
+  },
+  {
+    id: 'agachamento-leve',
+    nome: 'Agachamento leve',
+    dica: 'Desça só um pouco, como se fosse sentar. Aquece os joelhos.',
+    musculos: 'Pernas',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'squat',
+    variacoes: {
+      facil: 'Desça bem pouquinho, devagar',
+      medio: 'Desça até a metade do agachamento',
+      dificil: 'Agachamento quase completo, ritmo leve',
+    },
+  },
+
+  // ─── CARDIO ────────────────────────────────────────────────────
+  {
+    id: 'polichinelo-sem-salto',
+    nome: 'Polichinelo sem salto',
+    dica: 'Abra uma perna de cada vez enquanto levanta os braços. Sem pular!',
+    musculos: 'Corpo todo',
+    categoria: 'cardio',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'jumping-jack',
+    variacoes: {
+      facil: 'Só os braços, pernas paradas',
+      medio: 'Abra uma perna de cada vez com os braços',
+      dificil: 'Ritmo rápido, amplitude máxima',
+    },
+  },
+  {
+    id: 'polichinelo',
+    nome: 'Polichinelo',
+    dica: 'Salte abrindo pernas e braços ao mesmo tempo.',
+    musculos: 'Corpo todo',
+    categoria: 'cardio',
+    equipamento: 'nenhum',
+    impacto: 'alto',
+    anim: 'jumping-jack',
+    variacoes: {
+      facil: 'Versão sem salto, um pé de cada vez',
+      medio: 'Polichinelo normal em ritmo confortável',
+      dificil: 'Polichinelo rápido e contínuo',
+    },
+  },
+  {
+    id: 'joelhos-altos',
+    nome: 'Joelhos altos (marcha)',
+    dica: 'Levante o joelho até a altura do quadril, alternando rápido.',
+    musculos: 'Pernas, abdômen',
+    categoria: 'cardio',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'high-knees',
+    variacoes: {
+      facil: 'Marcha com joelhos na altura confortável',
+      medio: 'Joelhos na altura do quadril, sem correr',
+      dificil: 'Corrida estacionária com joelhos altos',
+    },
+  },
+  {
+    id: 'boxe-sombra',
+    nome: 'Boxe (socos no ar)',
+    dica: 'Soque o ar alternando os braços, gire um pouco o tronco.',
+    musculos: 'Braços, ombros, cardio',
+    categoria: 'cardio',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'punch',
+    variacoes: {
+      facil: 'Socos lentos e controlados',
+      medio: 'Socos firmes em ritmo médio',
+      dificil: 'Socos rápidos, adicione leve agachamento',
+    },
+  },
+  {
+    id: 'subida-degrau',
+    nome: 'Subida no degrau',
+    dica: 'Suba e desça do primeiro degrau da escada, alternando a perna que sobe primeiro.',
+    musculos: 'Pernas, glúteos',
+    categoria: 'cardio',
+    equipamento: 'escada',
+    impacto: 'baixo',
+    anim: 'step-up',
+    variacoes: {
+      facil: 'Devagar, segurando no corrimão',
+      medio: 'Ritmo médio, sem apoio',
+      dificil: 'Ritmo rápido, joelho alto ao subir',
+    },
+  },
+  {
+    id: 'passo-lateral',
+    nome: 'Passo lateral com braços',
+    dica: 'Dê um passo para o lado levantando os braços, volte e repita para o outro lado.',
+    musculos: 'Pernas, corpo todo',
+    categoria: 'cardio',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'side-step',
+    variacoes: {
+      facil: 'Passos pequenos, braços até o ombro',
+      medio: 'Passos largos, braços até o alto',
+      dificil: 'Ritmo rápido com leve agachamento',
+    },
+  },
+
+  // ─── PERNAS E GLÚTEOS ──────────────────────────────────────────
+  {
+    id: 'agachamento',
+    nome: 'Agachamento',
+    dica: 'Empurre o quadril para trás como se fosse sentar. Joelhos na direção dos pés.',
+    musculos: 'Pernas, glúteos',
+    categoria: 'pernas',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'squat',
+    variacoes: {
+      facil: 'Desça pouco, use uma cadeira atrás por segurança',
+      medio: 'Desça até as coxas quase paralelas ao chão',
+      dificil: 'Agachamento completo com pausa de 2s embaixo',
+    },
+  },
+  {
+    id: 'agachamento-na-cadeira',
+    nome: 'Sentar e levantar da cadeira',
+    dica: 'Sente na cadeira e levante sem usar as mãos. Perfeito para começar!',
+    musculos: 'Pernas, glúteos',
+    categoria: 'pernas',
+    equipamento: 'cadeira',
+    impacto: 'baixo',
+    anim: 'chair-squat',
+    variacoes: {
+      facil: 'Use as mãos nas coxas para ajudar',
+      medio: 'Sem usar as mãos, desça devagar',
+      dificil: 'Só encoste na cadeira e suba (não sente)',
+    },
+  },
+  {
+    id: 'cadeirinha-na-parede',
+    nome: 'Cadeirinha na parede',
+    dica: 'Costas na parede, escorregue até "sentar" no ar e segure.',
+    musculos: 'Coxas',
+    categoria: 'pernas',
+    equipamento: 'parede',
+    impacto: 'baixo',
+    anim: 'wall-sit',
+    variacoes: {
+      facil: 'Desça só um pouco, joelhos bem dobrados não',
+      medio: 'Coxas quase paralelas ao chão',
+      dificil: 'Coxas paralelas ao chão o tempo todo',
+    },
+  },
+  {
+    id: 'afundo',
+    nome: 'Afundo (passada)',
+    dica: 'Dê um passo à frente e desça o joelho de trás. Tronco reto.',
+    musculos: 'Pernas, glúteos',
+    categoria: 'pernas',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'lunge',
+    variacoes: {
+      facil: 'Desça pouco, apoie a mão na parede',
+      medio: 'Desça até o joelho quase tocar o chão',
+      dificil: 'Alterne as pernas sem parar',
+    },
+  },
+  {
+    id: 'ponte-de-gluteo',
+    nome: 'Ponte de glúteo',
+    dica: 'Deitado de costas, joelhos dobrados, levante o quadril apertando o bumbum.',
+    musculos: 'Glúteos, lombar',
+    categoria: 'pernas',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'glute-bridge',
+    variacoes: {
+      facil: 'Levante o quadril até onde for confortável',
+      medio: 'Levante bem alto, segure 1s lá em cima',
+      dificil: 'Segure 3s no alto a cada repetição',
+    },
+  },
+  {
+    id: 'elevacao-panturrilha',
+    nome: 'Elevação de panturrilha',
+    dica: 'Suba na ponta dos pés, segure 1 segundo e desça devagar.',
+    musculos: 'Panturrilhas',
+    categoria: 'pernas',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'calf-raise',
+    variacoes: {
+      facil: 'Com apoio na parede ou cadeira',
+      medio: 'Sem apoio',
+      dificil: 'Em um pé só, alternando',
+    },
+  },
+
+  // ─── SUPERIORES ────────────────────────────────────────────────
+  {
+    id: 'flexao-na-parede',
+    nome: 'Flexão na parede',
+    dica: 'Mãos na parede na altura dos ombros, dobre os braços levando o rosto à parede.',
+    musculos: 'Peito, braços',
+    categoria: 'superiores',
+    equipamento: 'parede',
+    impacto: 'baixo',
+    anim: 'wall-pushup',
+    variacoes: {
+      facil: 'Fique mais perto da parede',
+      medio: 'Afaste mais os pés da parede',
+      dificil: 'Use a beirada de uma mesa firme em vez da parede',
+    },
+  },
+  {
+    id: 'flexao-com-joelhos',
+    nome: 'Flexão com joelhos no chão',
+    dica: 'Joelhos apoiados, corpo reto do joelho à cabeça, desça o peito.',
+    musculos: 'Peito, braços',
+    categoria: 'superiores',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'knee-pushup',
+    variacoes: {
+      facil: 'Desça só até a metade',
+      medio: 'Desça até quase tocar o chão',
+      dificil: 'Flexão completa sem apoiar os joelhos',
+    },
+  },
+  {
+    id: 'triceps-na-cadeira',
+    nome: 'Tríceps na cadeira',
+    dica: 'Mãos na beirada da cadeira, desça o corpo dobrando os cotovelos para trás.',
+    musculos: 'Tríceps (parte de trás do braço)',
+    categoria: 'superiores',
+    equipamento: 'cadeira',
+    impacto: 'baixo',
+    anim: 'chair-dip',
+    variacoes: {
+      facil: 'Joelhos bem dobrados, desça pouco',
+      medio: 'Pernas mais esticadas',
+      dificil: 'Pernas esticadas, descida completa',
+    },
+  },
+  {
+    id: 'rosca-com-garrafas',
+    nome: 'Rosca com garrafas',
+    dica: 'Segure uma garrafa cheia em cada mão e dobre os cotovelos. Cotovelos colados no corpo.',
+    musculos: 'Bíceps',
+    categoria: 'superiores',
+    equipamento: 'garrafas',
+    impacto: 'baixo',
+    anim: 'bicep-curl',
+    variacoes: {
+      facil: 'Garrafas de 500ml',
+      medio: 'Garrafas de 1 a 2 litros',
+      dificil: 'Garrafas de 2L com areia, suba devagar',
+    },
+  },
+  {
+    id: 'desenvolvimento-garrafas',
+    nome: 'Empurrar garrafas para o alto',
+    dica: 'Garrafas na altura dos ombros, empurre para cima até esticar os braços.',
+    musculos: 'Ombros',
+    categoria: 'superiores',
+    equipamento: 'garrafas',
+    impacto: 'baixo',
+    anim: 'overhead-press',
+    variacoes: {
+      facil: 'Garrafas leves, alterne os braços',
+      medio: 'Os dois braços juntos',
+      dificil: 'Garrafas pesadas, descida bem lenta',
+    },
+  },
+  {
+    id: 'remada-com-garrafas',
+    nome: 'Remada curvada com garrafas',
+    dica: 'Incline o tronco à frente com as costas retas e puxe as garrafas até a barriga.',
+    musculos: 'Costas',
+    categoria: 'superiores',
+    equipamento: 'garrafas',
+    impacto: 'baixo',
+    anim: 'row',
+    variacoes: {
+      facil: 'Apoie uma mão na cadeira, reme com a outra',
+      medio: 'As duas mãos ao mesmo tempo',
+      dificil: 'Pausa de 2s com as garrafas na barriga',
+    },
+  },
+  {
+    id: 'elevacao-lateral-garrafas',
+    nome: 'Elevação lateral com garrafas',
+    dica: 'Braços ao lado do corpo, levante as garrafas até a altura dos ombros.',
+    musculos: 'Ombros',
+    categoria: 'superiores',
+    equipamento: 'garrafas',
+    impacto: 'baixo',
+    anim: 'lateral-raise',
+    variacoes: {
+      facil: 'Garrafas de 500ml, até a metade',
+      medio: 'Até a altura dos ombros',
+      dificil: 'Garrafas maiores, descida lenta',
+    },
+  },
+
+  // ─── CORE (ABDÔMEN) ────────────────────────────────────────────
+  {
+    id: 'prancha',
+    nome: 'Prancha',
+    dica: 'Antebraços no chão, corpo reto como uma tábua. Aperte a barriga!',
+    musculos: 'Abdômen, corpo todo',
+    categoria: 'core',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'plank',
+    variacoes: {
+      facil: 'Prancha com joelhos apoiados no chão',
+      medio: 'Prancha completa nos antebraços',
+      dificil: 'Prancha com braços esticados',
+    },
+  },
+  {
+    id: 'abdominal-curto',
+    nome: 'Abdominal curto',
+    dica: 'Deitado, joelhos dobrados, suba só os ombros do chão olhando para o teto.',
+    musculos: 'Abdômen',
+    categoria: 'core',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'crunch',
+    variacoes: {
+      facil: 'Suba bem pouquinho, mãos nas coxas',
+      medio: 'Mãos cruzadas no peito',
+      dificil: 'Pausa de 2s lá em cima',
+    },
+  },
+  {
+    id: 'elevacao-joelho-em-pe',
+    nome: 'Abdominal em pé (joelho ao peito)',
+    dica: 'Em pé, traga o joelho em direção ao peito apertando a barriga. Alterne.',
+    musculos: 'Abdômen',
+    categoria: 'core',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'standing-crunch',
+    variacoes: {
+      facil: 'Joelho até onde for confortável',
+      medio: 'Joelho alto, toque com as mãos',
+      dificil: 'Ritmo rápido sem perder o equilíbrio',
+    },
+  },
+
+  // ─── ALONGAMENTO / VOLTA À CALMA ───────────────────────────────
+  {
+    id: 'alongamento-alcancar-ceu',
+    nome: 'Alongamento: alcançar o céu',
+    dica: 'Estique os braços bem para cima, fique na ponta dos pés e respire fundo.',
+    musculos: 'Corpo todo',
+    categoria: 'alongamento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'stretch-reach',
+    variacoes: {
+      facil: 'Braços para cima, pés no chão',
+      medio: 'Na ponta dos pés',
+      dificil: 'Incline levemente para cada lado',
+    },
+  },
+  {
+    id: 'alongamento-frente',
+    nome: 'Alongamento: tocar os pés',
+    dica: 'Dobre o tronco à frente devagar, deixe os braços pendurados. Joelhos levemente dobrados.',
+    musculos: 'Posterior das pernas, costas',
+    categoria: 'alongamento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'stretch-fold',
+    variacoes: {
+      facil: 'Desça só até onde for confortável',
+      medio: 'Mãos na altura das canelas',
+      dificil: 'Toque os pés mantendo as pernas quase retas',
+    },
+  },
+  {
+    id: 'alongamento-quadriceps',
+    nome: 'Alongamento: coxa da frente',
+    dica: 'Em pé, puxe o pé em direção ao bumbum. Segure na parede se precisar.',
+    musculos: 'Quadríceps',
+    categoria: 'alongamento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'stretch-quad',
+    variacoes: {
+      facil: 'Com apoio na parede',
+      medio: 'Sem apoio, troque de perna na metade',
+      dificil: 'Sem apoio, olhos fechados (equilíbrio)',
+    },
+  },
+  {
+    id: 'respiracao-final',
+    nome: 'Respiração e relaxamento',
+    dica: 'Inspire pelo nariz levantando os braços, solte pela boca descendo. Bem devagar.',
+    musculos: 'Mente e corpo 🙂',
+    categoria: 'alongamento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'breathe',
+    variacoes: {
+      facil: 'Respire no seu ritmo',
+      medio: 'Inspire em 4s, solte em 6s',
+      dificil: 'Inspire em 4s, segure 4s, solte em 8s',
+    },
+  },
+]
+
+export const porId = (id: string): Exercicio => {
+  const ex = EXERCICIOS.find((e) => e.id === id)
+  if (!ex) throw new Error(`Exercício não encontrado: ${id}`)
+  return ex
+}

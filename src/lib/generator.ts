@@ -1,0 +1,96 @@
+// Gerador do treino do dia: monta aquecimento → circuito → alongamento
+// conforme o tempo disponível e os objetos da casa que o usuário tem.
+
+import { EXERCICIOS, type Equipamento, type Exercicio } from '../data/exercises'
+import type { Ajustes, Nivel } from './storage'
+
+export interface Etapa {
+  tipo: 'exercicio' | 'descanso'
+  exercicio: Exercicio
+  segundos: number
+  bloco: 'aquecimento' | 'circuito' | 'alongamento'
+}
+
+export interface Treino {
+  etapas: Etapa[]
+  totalSegundos: number
+  totalExercicios: number
+}
+
+/** Embaralhador com semente — o treino do dia é sempre o mesmo, mas muda a cada dia. */
+function embaralharComSemente<T>(itens: T[], semente: number): T[] {
+  const arr = [...itens]
+  let s = semente
+  for (let i = arr.length - 1; i > 0; i--) {
+    s = (s * 1103515245 + 12345) % 2147483648
+    const j = s % (i + 1)
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+function sementeDoDia(): number {
+  const d = new Date()
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+}
+
+export function gerarTreino(ajustes: Ajustes, nivel: Nivel): Treino {
+  const semente = sementeDoDia()
+  const temEquip = (e: Equipamento) => e === 'nenhum' || ajustes.equipamentos.includes(e)
+
+  // Iniciante = só baixo impacto (protege joelhos e articulações)
+  const disponiveis = EXERCICIOS.filter(
+    (ex) => temEquip(ex.equipamento) && (nivel !== 'facil' || ex.impacto === 'baixo'),
+  )
+
+  const cat = (c: Exercicio['categoria']) =>
+    embaralharComSemente(disponiveis.filter((e) => e.categoria === c), semente + c.length)
+
+  const aquecimento = cat('aquecimento').slice(0, 3)
+  const alongamento = [
+    ...cat('alongamento').filter((e) => e.id !== 'respiracao-final').slice(0, 2),
+    EXERCICIOS.find((e) => e.id === 'respiracao-final')!,
+  ]
+
+  const totalSeg = ajustes.minutos * 60
+  const segAquecimento = aquecimento.length * (30 + 10) // 30s exercício + 10s transição
+  const segAlongamento = alongamento.length * (25 + 5)
+  const segCircuito = Math.max(0, totalSeg - segAquecimento - segAlongamento)
+
+  // Circuito: revezamento entre cardio, pernas, superiores e core
+  const slotSeg = ajustes.segExercicio + ajustes.segDescanso
+  const slots = Math.max(2, Math.floor(segCircuito / slotSeg))
+
+  const baldes = [cat('cardio'), cat('pernas'), cat('superiores'), cat('core')]
+  const circuito: Exercicio[] = []
+  let rodada = 0
+  while (circuito.length < slots && rodada < 10) {
+    for (const balde of baldes) {
+      if (circuito.length >= slots) break
+      if (balde.length > 0) circuito.push(balde[rodada % balde.length])
+    }
+    rodada++
+  }
+
+  // Monta a sequência final de etapas
+  const etapas: Etapa[] = []
+  for (const ex of aquecimento) {
+    etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: 30, bloco: 'aquecimento' })
+    etapas.push({ tipo: 'descanso', exercicio: ex, segundos: 10, bloco: 'aquecimento' })
+  }
+  circuito.forEach((ex, i) => {
+    etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: ajustes.segExercicio, bloco: 'circuito' })
+    if (i < circuito.length - 1) {
+      etapas.push({ tipo: 'descanso', exercicio: ex, segundos: ajustes.segDescanso, bloco: 'circuito' })
+    }
+  })
+  for (const ex of alongamento) {
+    etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: 25, bloco: 'alongamento' })
+  }
+
+  // Remove descansos no fim de bloco duplicados
+  const totalSegundos = etapas.reduce((s, e) => s + e.segundos, 0)
+  const totalExercicios = etapas.filter((e) => e.tipo === 'exercicio').length
+
+  return { etapas, totalSegundos, totalExercicios }
+}
