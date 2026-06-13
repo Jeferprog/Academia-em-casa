@@ -6,7 +6,7 @@ import { getCtx } from './audioCtx'
 
 export type EstiloMusica = 'leve' | 'energia' | 'calma'
 
-const BPM: Record<EstiloMusica, number> = { leve: 104, energia: 128, calma: 72 }
+const BPM: Record<EstiloMusica, number> = { leve: 104, energia: 134, calma: 72 }
 const VOLUME_BASE = 0.16
 const VOLUME_DUCK = 0.05 // volume enquanto a voz fala
 
@@ -29,8 +29,10 @@ let timer: number | undefined
 let proxima = 0
 let passo = 0 // semicolcheia atual (0–15)
 let compasso = 0
+let compassoTotal = 0 // conta sem reiniciar, para variar os padrões
 let estilo: EstiloMusica = 'energia'
 let ruidoBuf: AudioBuffer | null = null
+let pump: GainNode | null = null
 
 function masterGain(): GainNode {
   const ctx = getCtx()
@@ -40,6 +42,29 @@ function masterGain(): GainNode {
     master.connect(ctx.destination)
   }
   return master
+}
+
+/**
+ * Barramento com "bombeamento": tudo (menos o bumbo) passa por aqui e é
+ * comprimido a cada batida do bumbo — o clássico efeito de música eletrônica
+ * de academia em que a música inteira pulsa junto com a batida.
+ */
+function bus(): GainNode {
+  const ctx = getCtx()
+  if (!pump) {
+    pump = ctx.createGain()
+    pump.gain.value = 1
+    pump.connect(masterGain())
+  }
+  return pump
+}
+
+function bombear(t: number) {
+  const g = bus().gain
+  const batida = 60 / BPM[estilo]
+  g.cancelScheduledValues(t)
+  g.setValueAtTime(0.45, t)
+  g.linearRampToValueAtTime(1, t + batida * 0.75)
 }
 
 function ruido(): AudioBuffer {
@@ -67,7 +92,7 @@ function bumbo(t: number) {
   o.stop(t + 0.2)
 }
 
-function chimbal(t: number, dur: number) {
+function chimbal(t: number, dur: number, ganho = 0.18) {
   const ctx = getCtx()
   const s = ctx.createBufferSource()
   s.buffer = ruido()
@@ -75,9 +100,9 @@ function chimbal(t: number, dur: number) {
   f.type = 'highpass'
   f.frequency.value = 7500
   const g = ctx.createGain()
-  g.gain.setValueAtTime(0.18, t)
+  g.gain.setValueAtTime(ganho, t)
   g.gain.exponentialRampToValueAtTime(0.001, t + dur)
-  s.connect(f).connect(g).connect(masterGain())
+  s.connect(f).connect(g).connect(bus())
   s.start(t)
   s.stop(t + dur + 0.02)
 }
@@ -92,7 +117,7 @@ function caixa(t: number) {
   const g = ctx.createGain()
   g.gain.setValueAtTime(0.45, t)
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.12)
-  s.connect(f).connect(g).connect(masterGain())
+  s.connect(f).connect(g).connect(bus())
   s.start(t)
   s.stop(t + 0.15)
 }
@@ -108,12 +133,12 @@ function baixo(t: number, semi: number, dur: number) {
   const g = ctx.createGain()
   g.gain.setValueAtTime(0.3, t)
   g.gain.exponentialRampToValueAtTime(0.001, t + dur)
-  o.connect(f).connect(g).connect(masterGain())
+  o.connect(f).connect(g).connect(bus())
   o.start(t)
   o.stop(t + dur + 0.02)
 }
 
-function sintetizador(t: number, semi: number) {
+function sintetizador(t: number, semi: number, ganho = 0.11, dur = 0.18) {
   const ctx = getCtx()
   const o = ctx.createOscillator()
   o.type = 'square'
@@ -122,11 +147,11 @@ function sintetizador(t: number, semi: number) {
   f.type = 'lowpass'
   f.frequency.value = 1800
   const g = ctx.createGain()
-  g.gain.setValueAtTime(0.11, t)
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.18)
-  o.connect(f).connect(g).connect(masterGain())
+  g.gain.setValueAtTime(ganho, t)
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur)
+  o.connect(f).connect(g).connect(bus())
   o.start(t)
-  o.stop(t + 0.2)
+  o.stop(t + dur + 0.02)
 }
 
 function teclado(t: number, semis: number[], dur: number) {
@@ -145,7 +170,7 @@ function teclado(t: number, semis: number[], dur: number) {
       g.gain.linearRampToValueAtTime(0.045, t + 0.5)
       g.gain.setValueAtTime(0.045, t + dur - 0.6)
       g.gain.linearRampToValueAtTime(0.0001, t + dur)
-      o.connect(f).connect(g).connect(masterGain())
+      o.connect(f).connect(g).connect(bus())
       o.start(t)
       o.stop(t + dur + 0.05)
     }
@@ -157,14 +182,26 @@ function teclado(t: number, semis: number[], dur: number) {
 function tocarPasso(t: number) {
   const ac = PROGRESSAO[compasso]
   if (estilo === 'energia') {
-    // batida "quatro no chão" estilo eletrônica de academia
-    if (passo % 4 === 0) bumbo(t)
+    // eletrônica de academia: "quatro no chão" com bombeamento na batida
+    if (passo % 4 === 0) {
+      bumbo(t)
+      bombear(t)
+    }
     if (passo % 8 === 4) caixa(t)
-    if (passo % 4 === 2) chimbal(t, 0.08)
-    else if (passo % 2 === 1 && (passo + compasso) % 3 === 0) chimbal(t, 0.03)
-    if (passo % 2 === 0) baixo(t, ac.baixo + (passo % 8 === 6 ? 12 : 0), 0.2)
-    if ([0, 3, 6, 10, 12].includes(passo) && (passo + compasso * 5) % 2 === 0) {
-      sintetizador(t, ac.notas[(passo + compasso) % 4] + 12)
+    // virada de caixa no fim de cada frase de 8 compassos
+    if (compassoTotal % 8 === 7 && passo >= 12) caixa(t)
+    // chimbal aberto no contratempo + fechado preenchendo as semicolcheias
+    if (passo % 4 === 2) chimbal(t, 0.12, 0.22)
+    else if (passo % 2 === 1) chimbal(t, 0.025, 0.09)
+    // baixo galopante alternando oitavas em colcheias
+    if (passo % 2 === 0) baixo(t, ac.baixo, 0.16)
+    else baixo(t, ac.baixo + 12, 0.1)
+    // frases alternadas: 4 compassos de melodia, 4 de arpejo corrido
+    const fraseArpejo = Math.floor(compassoTotal / 4) % 2 === 1
+    if (fraseArpejo) {
+      sintetizador(t, ac.notas[(passo + (passo >> 2)) % 4] + 12, 0.09, 0.12)
+    } else if ([0, 3, 6, 10, 14].includes(passo)) {
+      sintetizador(t, ac.notas[(passo + compasso) % 4] + 12, 0.12, 0.2)
     }
   } else if (estilo === 'leve') {
     if (passo === 0 || passo === 8) bumbo(t)
@@ -191,6 +228,7 @@ function agendar() {
     if (passo === 16) {
       passo = 0
       compasso = (compasso + 1) % PROGRESSAO.length
+      compassoTotal++
     }
   }
 }
@@ -206,6 +244,8 @@ export function iniciarMusica(novo: EstiloMusica) {
     proxima = ctx.currentTime + 0.05
     passo = 0
     compasso = 0
+    compassoTotal = 0
+    bus().gain.setValueAtTime(1, ctx.currentTime)
     agendar()
     timer = window.setInterval(agendar, 40)
   } catch {
