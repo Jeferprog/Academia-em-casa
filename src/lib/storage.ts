@@ -1,0 +1,134 @@
+// Persistência local (LocalStorage) — todos os dados ficam só no aparelho.
+
+import type { Equipamento } from '../data/exercises'
+
+export type Nivel = 'facil' | 'medio' | 'dificil'
+
+export interface Perfil {
+  nomes: string[] // 1 ou 2 nomes (treino em casal!)
+  nivel: Nivel
+  criadoEm: string
+}
+
+export interface Ajustes {
+  minutos: number
+  segExercicio: number
+  segDescanso: number
+  somLigado: boolean
+  vozLigada: boolean
+  equipamentos: Equipamento[]
+}
+
+export interface RegistroTreino {
+  data: string // YYYY-MM-DD
+  minutos: number
+  exercicios: number
+  sentimento?: string // emoji pós-treino
+}
+
+const K_PERFIL = 'aec.perfil'
+const K_AJUSTES = 'aec.ajustes'
+const K_HISTORICO = 'aec.historico'
+
+export const AJUSTES_PADRAO: Ajustes = {
+  minutos: 15,
+  segExercicio: 30,
+  segDescanso: 20,
+  somLigado: true,
+  vozLigada: true,
+  equipamentos: ['nenhum', 'parede', 'cadeira', 'garrafas'],
+}
+
+function ler<T>(chave: string): T | null {
+  try {
+    const raw = localStorage.getItem(chave)
+    return raw ? (JSON.parse(raw) as T) : null
+  } catch {
+    return null
+  }
+}
+
+function gravar(chave: string, valor: unknown) {
+  localStorage.setItem(chave, JSON.stringify(valor))
+}
+
+export const lerPerfil = () => ler<Perfil>(K_PERFIL)
+export const gravarPerfil = (p: Perfil) => gravar(K_PERFIL, p)
+
+export const lerAjustes = (): Ajustes => ({ ...AJUSTES_PADRAO, ...(ler<Ajustes>(K_AJUSTES) ?? {}) })
+export const gravarAjustes = (a: Ajustes) => gravar(K_AJUSTES, a)
+
+export const lerHistorico = (): RegistroTreino[] => ler<RegistroTreino[]>(K_HISTORICO) ?? []
+
+export function registrarTreino(r: RegistroTreino) {
+  const h = lerHistorico()
+  h.push(r)
+  gravar(K_HISTORICO, h)
+}
+
+export function atualizarUltimoSentimento(emoji: string) {
+  const h = lerHistorico()
+  if (h.length > 0) {
+    h[h.length - 1].sentimento = emoji
+    gravar(K_HISTORICO, h)
+  }
+}
+
+export const hojeISO = () => {
+  const d = new Date()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
+
+/**
+ * Sequência de dias (streak) gentil com iniciantes:
+ * 1 dia de folga não quebra a sequência (2 dias seguidos sem treinar, sim).
+ */
+export function calcularStreak(historico: RegistroTreino[]): number {
+  if (historico.length === 0) return 0
+  const dias = new Set(historico.map((r) => r.data))
+  let streak = 0
+  let folgasSeguidas = 0
+  const cursor = new Date()
+  // Se ainda não treinou hoje, começa contando a partir de ontem.
+  if (!dias.has(hojeISO())) cursor.setDate(cursor.getDate() - 1)
+  for (let i = 0; i < 365; i++) {
+    const mm = String(cursor.getMonth() + 1).padStart(2, '0')
+    const dd = String(cursor.getDate()).padStart(2, '0')
+    const iso = `${cursor.getFullYear()}-${mm}-${dd}`
+    if (dias.has(iso)) {
+      streak++
+      folgasSeguidas = 0
+    } else {
+      folgasSeguidas++
+      if (folgasSeguidas >= 2) break
+    }
+    cursor.setDate(cursor.getDate() - 1)
+  }
+  return streak
+}
+
+export interface Conquista {
+  id: string
+  titulo: string
+  emoji: string
+}
+
+/** Conquistas desbloqueadas no estado atual do histórico. */
+export function conquistas(historico: RegistroTreino[]): Conquista[] {
+  const n = historico.length
+  const streak = calcularStreak(historico)
+  const minutosTotais = historico.reduce((s, r) => s + r.minutos, 0)
+  const lista: Conquista[] = []
+  if (n >= 1) lista.push({ id: 'primeiro', titulo: 'Primeiro treino!', emoji: '🌱' })
+  if (n >= 3) lista.push({ id: 'tres', titulo: '3 treinos completos', emoji: '🔥' })
+  if (n >= 10) lista.push({ id: 'dez', titulo: '10 treinos completos', emoji: '💪' })
+  if (n >= 30) lista.push({ id: 'trinta', titulo: '30 treinos completos', emoji: '🏆' })
+  if (streak >= 3) lista.push({ id: 'streak3', titulo: '3 dias seguidos', emoji: '⚡' })
+  if (streak >= 7) lista.push({ id: 'streak7', titulo: '1 semana de sequência', emoji: '🌟' })
+  if (streak >= 30) lista.push({ id: 'streak30', titulo: '1 mês de sequência!', emoji: '👑' })
+  if (minutosTotais >= 60) lista.push({ id: 'hora', titulo: '1 hora acumulada', emoji: '⏰' })
+  if (minutosTotais >= 300) lista.push({ id: 'cincohoras', titulo: '5 horas acumuladas', emoji: '🚀' })
+  return lista
+}
