@@ -1,10 +1,10 @@
 // Pré-treino: escolha do tempo, ajustes do cronômetro, objetos da casa
 // disponíveis e prévia da sequência gerada para hoje.
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Equipamento } from '../data/exercises'
 import { gerarTreino } from '../lib/generator'
-import type { Ajustes, Nivel, Perfil } from '../lib/storage'
+import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
 interface Props {
   perfil: Perfil
@@ -26,6 +26,8 @@ const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘'
 
 export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
+  const [linkSpotify, setLinkSpotify] = useState('')
+  const [linkInvalido, setLinkInvalido] = useState(false)
   const exercicios = treino.etapas.filter((e) => e.tipo === 'exercicio')
 
   const muda = (parcial: Partial<Ajustes>) => aoMudarAjustes({ ...ajustes, ...parcial })
@@ -115,7 +117,7 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
       </div>
 
       <div className="cartao">
-        <h3>🔊 Som, voz e música</h3>
+        <h3>🔊 Som e voz</h3>
         <div className="chips">
           <button className={`chip ${ajustes.somLigado ? 'ativo' : ''}`} onClick={() => muda({ somLigado: !ajustes.somLigado })}>
             {ajustes.somLigado ? '🔔 Bipes ligados' : '🔕 Bipes desligados'}
@@ -123,14 +125,65 @@ export default function PreWorkout({ perfil, ajustes, aoMudarAjustes, aoMudarNiv
           <button className={`chip ${ajustes.vozLigada ? 'ativo' : ''}`} onClick={() => muda({ vozLigada: !ajustes.vozLigada })}>
             {ajustes.vozLigada ? '🗣 Voz ligada' : '🤐 Voz desligada'}
           </button>
-          <button className={`chip ${ajustes.musicaLigada ? 'ativo' : ''}`} onClick={() => muda({ musicaLigada: !ajustes.musicaLigada })}>
-            {ajustes.musicaLigada ? '🎵 Música ligada' : '🔇 Música desligada'}
+        </div>
+      </div>
+
+      <div className="cartao">
+        <h3>🎵 Música</h3>
+        <div className="chips">
+          <button
+            className={`chip ${ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' ? 'ativo' : ''}`}
+            onClick={() => muda({ musicaLigada: true, fonteMusica: 'spotify' })}
+          >
+            🟢 Spotify
+          </button>
+          <button
+            className={`chip ${ajustes.musicaLigada && ajustes.fonteMusica === 'app' ? 'ativo' : ''}`}
+            onClick={() => muda({ musicaLigada: true, fonteMusica: 'app' })}
+          >
+            🎹 Trilha do app
+          </button>
+          <button
+            className={`chip ${!ajustes.musicaLigada ? 'ativo' : ''}`}
+            onClick={() => muda({ musicaLigada: false })}
+          >
+            🔇 Sem música
           </button>
         </div>
-        <small className="nota">
-          A música é gerada pelo próprio app: animada no circuito, suave no alongamento — e
-          abaixa sozinha quando a voz fala.
-        </small>
+        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && (
+          <>
+            <label className="campo campo-spotify">
+              Cole o link da sua playlist <small>(opcional)</small>
+              <input
+                value={linkSpotify}
+                onChange={(e) => {
+                  setLinkSpotify(e.target.value)
+                  const caminho = parseSpotify(e.target.value)
+                  setLinkInvalido(e.target.value.trim() !== '' && !caminho)
+                  if (caminho) muda({ spotifyPlaylist: caminho })
+                }}
+                placeholder="https://open.spotify.com/playlist/..."
+                inputMode="url"
+              />
+            </label>
+            {linkInvalido && (
+              <small className="nota nota-erro">
+                Link não reconhecido — no Spotify, toque em Compartilhar → Copiar link da playlist.
+              </small>
+            )}
+            <small className="nota">
+              O player do Spotify aparece na tela do treino: toque o ▶ dele ao começar. Para ouvir
+              as músicas completas, esteja logado no Spotify; sem login tocam prévias. Precisa de
+              internet.
+            </small>
+          </>
+        )}
+        {ajustes.musicaLigada && ajustes.fonteMusica === 'app' && (
+          <small className="nota">
+            Trilha gerada pelo próprio app: animada no circuito, suave no alongamento, abaixa
+            quando a voz fala — e funciona offline.
+          </small>
+        )}
       </div>
 
       <div className="cartao">

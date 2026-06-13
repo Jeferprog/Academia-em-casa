@@ -199,7 +199,7 @@ Casal            { perfis[2], conquistasDeDupla[], desafioDaSemana }
 
 ### 🔵 Fase 3 — "Capricho"
 - [ ] Avatar 3D personalizável (Mixamo + Three.js)
-- [ ] Integração Spotify
+- [x] ~~Integração Spotify~~ → antecipada: player embutido com playlist personalizável
 - [ ] Modo TV
 - [ ] Fotos de progresso
 - [ ] Desafios semanais do casal

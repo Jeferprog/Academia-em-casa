@@ -62,15 +62,17 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Trilha de academia: clima muda conforme o bloco do treino
+  const usaSpotify = ajustes.fonteMusica === 'spotify'
+
+  // Trilha gerada pelo app: clima muda conforme o bloco do treino
   useEffect(() => {
-    if (!musicaOn || pausado) {
+    if (!musicaOn || pausado || usaSpotify) {
       pararMusica()
       return
     }
     iniciarMusica(ESTILO_BLOCO[etapa.bloco])
     return pararMusica
-  }, [musicaOn, pausado, etapa.bloco])
+  }, [musicaOn, pausado, etapa.bloco, usaSpotify])
 
   // Cronômetro regressivo
   useEffect(() => {
@@ -231,6 +233,16 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           ⏭ Pular
         </button>
       </footer>
+
+      {usaSpotify && musicaOn && (
+        <iframe
+          className="spotify-embed"
+          src={`https://open.spotify.com/embed/${ajustes.spotifyPlaylist}?utm_source=generator&theme=0`}
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          title="Player do Spotify"
+        />
+      )}
     </div>
   )
 }

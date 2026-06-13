@@ -15,6 +15,7 @@ família — você e quem treina com você.
 - ✅ Avatar animado demonstrando cada movimento
 - ✅ Frases de incentivo na tela e faladas em português (voz do navegador)
 - ✅ Música de academia gerada pelo próprio app (Web Audio): animada no circuito, suave no alongamento, e abaixa sozinha quando a voz fala
+- ✅ Spotify: player embutido na tela de treino com a playlist que você escolher (cole o link no pré-treino)
 - ✅ Botão "Tá difícil" que troca na hora pela versão mais leve do exercício
 - ✅ Sequência de dias (streak), calendário e conquistas — salvos no aparelho
 - ✅ Funciona offline depois da primeira visita (PWA) e pode ser instalado na tela inicial
