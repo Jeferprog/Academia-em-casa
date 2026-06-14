@@ -3,9 +3,10 @@
 
 import { useMemo, useState } from 'react'
 import { EQUIP_INFO, type Equipamento } from '../data/exercises'
+import { progressoPrograma } from '../data/programa'
 import { gerarTreino, materiaisDoTreino } from '../lib/generator'
 import { obterURLLogin } from '../lib/spotifyAuth'
-import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
+import { lerHistorico, parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
 interface Props {
   perfil: Perfil
@@ -30,6 +31,12 @@ const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘'
 export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyErroLogin, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
   const materiais = useMemo(() => materiaisDoTreino(treino), [treino])
+  const prog = useMemo(() => progressoPrograma(lerHistorico().length), [])
+  const semana = prog.semana
+  const segueSugestao =
+    ajustes.minutos === semana.minutos &&
+    ajustes.segExercicio === semana.segExercicio &&
+    ajustes.segDescanso === semana.segDescanso
   const [linkSpotify, setLinkSpotify] = useState('')
   const [linkInvalido, setLinkInvalido] = useState(false)
   const [conectandoSpotify, setConectandoSpotify] = useState(false)
@@ -46,6 +53,8 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
     })
   }
 
+  const ehCelular = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+
   const conectarSpotify = async () => {
     setConectandoSpotify(true)
     const url = await obterURLLogin()
@@ -61,6 +70,32 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
         </button>
         <h2>Treino de hoje</h2>
       </header>
+
+      <div className="cartao sugestao-semana">
+        <div className="programa-topo">
+          <span className="programa-rotulo">📅 Semana {semana.numero} · {semana.titulo}</span>
+        </div>
+        <p className="programa-foco">{semana.foco}</p>
+        <small className="nota">
+          Sugestão de hoje: <strong>{semana.minutos} min</strong> · {semana.segExercicio}s de exercício ·{' '}
+          {semana.segDescanso}s de descanso.
+        </small>
+        {!segueSugestao && (
+          <button
+            className="btn-secundario btn-aplicar-sugestao"
+            onClick={() =>
+              muda({
+                minutos: semana.minutos,
+                segExercicio: semana.segExercicio,
+                segDescanso: semana.segDescanso,
+              })
+            }
+          >
+            ✨ Usar a sugestão da semana
+          </button>
+        )}
+        {segueSugestao && <small className="nota nota-ok">✓ Seguindo a sugestão da semana</small>}
+      </div>
 
       <div className="cartao">
         <h3>⏰ Quanto tempo vocês têm hoje?</h3>
@@ -128,6 +163,31 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
         </div>
       </div>
 
+      {perfil.nomes.length > 1 && (
+        <div className="cartao">
+          <h3>👫 Treino em dupla</h3>
+          <div className="chips">
+            <button
+              className={`chip ${!ajustes.revezamento ? 'ativo' : ''}`}
+              onClick={() => muda({ revezamento: false })}
+            >
+              👯 Juntos ao mesmo tempo
+            </button>
+            <button
+              className={`chip ${ajustes.revezamento ? 'ativo' : ''}`}
+              onClick={() => muda({ revezamento: true })}
+            >
+              🔁 Revezamento
+            </button>
+          </div>
+          <small className="nota">
+            {ajustes.revezamento
+              ? `Um faz o exercício enquanto o outro descansa e incentiva. Alterna entre ${perfil.nomes[0]} e ${perfil.nomes[1]} a cada exercício.`
+              : 'Os dois fazem o mesmo exercício ao mesmo tempo, lado a lado.'}
+          </small>
+        </div>
+      )}
+
       <div className="cartao">
         <h3>🔊 Som e voz</h3>
         <div className="chips">
@@ -162,7 +222,14 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
             🔇 Sem música
           </button>
         </div>
-        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && (
+        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && ehCelular && (
+          <small className="nota nota-erro">
+            ⚠️ No celular, o Spotify dentro do app não toca (o Spotify não libera isso em
+            navegadores de celular, só em computador). Use a "🎹 Trilha do app" — também abaixa
+            para a voz e funciona offline.
+          </small>
+        )}
+        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && !ehCelular && (
           <>
             {!spotifyConectado ? (
               <>

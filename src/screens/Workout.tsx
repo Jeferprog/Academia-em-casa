@@ -13,6 +13,7 @@ interface Props {
   treino: Treino
   ajustes: Ajustes
   perfil: Perfil
+  modoTV: boolean
   aoTerminar: (completo: boolean) => void
 }
 
@@ -23,7 +24,7 @@ const ESTILO_BLOCO: Record<string, EstiloMusica> = {
   alongamento: 'calma',
 }
 
-export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) {
+export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }: Props) {
   const { etapas } = treino
   const [indice, setIndice] = useState(0)
   const [msRestante, setMsRestante] = useState(etapas[0].segundos * 1000)
@@ -54,6 +55,11 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   // Durante o descanso o avatar já demonstra o PRÓXIMO exercício; no exercício,
   // demonstra o atual. Em ambos os casos a animação continua rodando.
   const exibido = ehExercicio ? etapa.exercicio : proxExercicio?.exercicio ?? etapa.exercicio
+
+  // Modo revezamento: alterna quem faz o exercício a cada exercício do circuito.
+  const revezando = ajustes.revezamento && perfil.nomes.length > 1
+  const pessoaAtiva = revezando ? perfil.nomes[(numExercicio - 1) % 2] : null
+  const pessoaTorcendo = revezando ? perfil.nomes[numExercicio % 2] : null
 
   const diz = (texto: string) => {
     if (ajustes.vozLigada) falar(texto)
@@ -174,11 +180,8 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       return
     }
     const nova = etapas[proximo]
-    // Descanso do circuito usa o valor ajustado ao vivo; pausa grande mantém o seu.
-    const segNova =
-      nova.tipo === 'descanso' && nova.bloco === 'circuito' && !nova.pausaGrande
-        ? segDescanso
-        : nova.segundos
+    // Descansos normais usam o valor ajustado ao vivo; pausa grande mantém o seu.
+    const segNova = nova.tipo === 'descanso' && !nova.pausaGrande ? segDescanso : nova.segundos
     setIndice(proximo)
     setMsRestante(segNova * 1000)
     setMsTotal(segNova * 1000)
@@ -189,7 +192,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     if (!pular && ajustes.somLigado) bipeTroca()
 
     if (nova.tipo === 'exercicio') {
-      diz(nova.exercicio.nome)
+      if (revezando) {
+        const ord = etapas.slice(0, proximo + 1).filter((e) => e.tipo === 'exercicio').length
+        const quem = perfil.nomes[(ord - 1) % 2]
+        diz(`Vez de ${quem}. ${nova.exercicio.nome}.`)
+      } else {
+        diz(nova.exercicio.nome)
+      }
     } else if (nova.pausaGrande) {
       const seguinte = etapas.slice(proximo + 1).find((e) => e.tipo === 'exercicio')
       const msg = fraseAleatoria('pausaGrande')
@@ -222,6 +231,14 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     }
   }
 
+  function alternarTelaCheia() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {})
+    }
+  }
+
   const seg = Math.max(0, Math.ceil(msRestante / 1000))
   const fracao = msTotal > 0 ? Math.max(0, msRestante / msTotal) : 0
   const CIRC = 2 * Math.PI * 54
@@ -230,7 +247,7 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   const ehPausaGrande = !ehExercicio && etapa.pausaGrande
 
   return (
-    <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'}`}>
+    <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'} ${modoTV ? 'modo-tv' : ''}`}>
       <header className="treino-topo">
         <span className="treino-bloco">{NOME_BLOCO[etapa.bloco]}</span>
         <span className="treino-contagem">
@@ -242,6 +259,9 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           aria-label={musicaOn ? 'Desligar música' : 'Ligar música'}
         >
           {musicaOn ? '🎵' : '🔇'}
+        </button>
+        <button className="btn-fechar" onClick={alternarTelaCheia} aria-label="Tela cheia">
+          📺
         </button>
         <button className="btn-fechar" onClick={sair} aria-label="Encerrar treino">
           ✕
@@ -281,6 +301,11 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       <section className="treino-info">
         {ehExercicio ? (
           <>
+            {revezando && (
+              <p className="revezamento-vez">
+                🔁 Vez de <strong>{pessoaAtiva}</strong> · {pessoaTorcendo} incentiva! 👏
+              </p>
+            )}
             <h2>{etapa.exercicio.nome}</h2>
             <p className="dica">{etapa.exercicio.dica}</p>
             <p className="variacao">

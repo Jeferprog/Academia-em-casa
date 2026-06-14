@@ -1,11 +1,14 @@
 // Tela inicial: saudação, streak, calendário dos últimos dias e botão de treinar.
 
+import { PROGRAMA, progressoPrograma } from '../data/programa'
 import { calcularStreak, conquistas, hojeISO, lerHistorico, type Perfil } from '../lib/storage'
 
 interface Props {
   perfil: Perfil
   aoTreinar: () => void
   aoAbrirBiblioteca: () => void
+  aoAbrirProgresso: () => void
+  aoAbrirConfig: () => void
 }
 
 function ultimosDias(n: number): { iso: string; rotulo: string }[] {
@@ -22,12 +25,13 @@ function ultimosDias(n: number): { iso: string; rotulo: string }[] {
   return dias
 }
 
-export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca }: Props) {
+export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca, aoAbrirProgresso, aoAbrirConfig }: Props) {
   const historico = lerHistorico()
   const streak = calcularStreak(historico)
   const diasTreinados = new Set(historico.map((r) => r.data))
   const treinouHoje = diasTreinados.has(hojeISO())
   const medalhas = conquistas(historico)
+  const prog = progressoPrograma(historico.length)
 
   const saudacao =
     perfil.nomes.length > 1 ? `${perfil.nomes[0]} & ${perfil.nomes[1]}` : perfil.nomes[0]
@@ -35,9 +39,14 @@ export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca }: Props) {
   return (
     <div className="tela home">
       <header className="home-topo">
-        <h1 className="logo">
-          🏠💪 Mexe<span>Junto</span>
-        </h1>
+        <div className="home-topo-linha">
+          <h1 className="logo">
+            🏠💪 Mexe<span>Junto</span>
+          </h1>
+          <button className="btn-fechar" onClick={aoAbrirConfig} aria-label="Configurações">
+            ⚙️
+          </button>
+        </div>
         <p className="saudacao">Olá, {saudacao}! 👋</p>
       </header>
 
@@ -62,6 +71,27 @@ export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca }: Props) {
         </div>
       </div>
 
+      <div className="cartao programa-cartao">
+        <div className="programa-topo">
+          <span className="programa-rotulo">📅 Programa Do Sofá ao Movimento</span>
+          <span className="programa-semana">Semana {prog.semana.numero}/{PROGRAMA.length}</span>
+        </div>
+        <strong className="programa-titulo">{prog.semana.titulo}</strong>
+        <p className="programa-foco">{prog.concluido ? '🎉 Programa completo! Vocês mandaram muito bem.' : prog.semana.foco}</p>
+        <div className="programa-barra">
+          <div
+            className="programa-barra-fill"
+            style={{ width: `${((prog.semana.numero - 1 + prog.diasNaSemana / 3) / PROGRAMA.length) * 100}%` }}
+          />
+        </div>
+        <div className="programa-pontos">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className={`programa-ponto ${i < prog.diasNaSemana ? 'feito' : ''}`} />
+          ))}
+          <small>{prog.diasNaSemana}/3 treinos desta semana</small>
+        </div>
+      </div>
+
       <button className="btn-principal btn-treinar" onClick={aoTreinar}>
         {treinouHoje ? 'Treinar de novo 💪' : 'COMEÇAR O TREINO DE HOJE 🚀'}
       </button>
@@ -78,6 +108,10 @@ export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca }: Props) {
           </div>
         </div>
       )}
+
+      <button className="btn-secundario" onClick={aoAbrirProgresso}>
+        📊 Meu progresso
+      </button>
 
       <button className="btn-secundario" onClick={aoAbrirBiblioteca}>
         📖 Ver todos os exercícios

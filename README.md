@@ -20,6 +20,14 @@ família — você e quem treina com você.
 - ✅ Sequência de dias (streak), calendário e conquistas — salvos no aparelho
 - ✅ Funciona offline depois da primeira visita (PWA) e pode ser instalado na tela inicial
 
+## Fase 2 — "Treinando junto"
+
+- ✅ Modo casal: conquistas de dupla e **modo revezamento** (um faz o exercício, o outro descansa e incentiva)
+- ✅ Programa progressivo de **8 semanas** ("Do Sofá ao Movimento"), que sugere os ajustes de cada semana
+- ✅ Tela **Meu progresso**: calendário do mês, gráfico de minutos por semana e registro de peso por pessoa com gráfico de tendência
+- ✅ **Lembrete diário** de treino por notificação (horário ajustável; mais confiável com o app instalado)
+- ✅ **Modo TV / tela grande**: avatar e textos ampliados durante o treino + botão de tela cheia
+
 ## Rodando localmente
 
 ```bash

@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
 import { gerarTreino, type Treino } from './lib/generator'
+import { agendarLembrete } from './lib/lembrete'
 import { estaConectado, processarCallback } from './lib/spotifyAuth'
 import {
   conquistas,
   gravarAjustes,
+  gravarModoTV,
   gravarPerfil,
   hojeISO,
   lerAjustes,
   lerHistorico,
+  lerLembrete,
+  lerModoTV,
   lerPerfil,
   registrarTreino,
   type Ajustes,
@@ -15,14 +19,16 @@ import {
   type Nivel,
   type Perfil,
 } from './lib/storage'
+import Config from './screens/Config'
 import Done from './screens/Done'
 import Home from './screens/Home'
 import Library from './screens/Library'
 import PreWorkout from './screens/PreWorkout'
+import Progresso from './screens/Progresso'
 import Setup from './screens/Setup'
 import Workout from './screens/Workout'
 
-type Tela = 'setup' | 'home' | 'pre' | 'treino' | 'fim' | 'biblioteca'
+type Tela = 'setup' | 'home' | 'pre' | 'treino' | 'fim' | 'biblioteca' | 'progresso' | 'config'
 
 // Há um código de retorno do login do Spotify na URL? (?code=...)
 const temCodigoSpotify = new URLSearchParams(window.location.search).has('code')
@@ -39,6 +45,13 @@ export default function App() {
   const [resumo, setResumo] = useState({ minutos: 0, exercicios: 0 })
   const [spotifyConectado, setSpotifyConectado] = useState(() => estaConectado())
   const [spotifyErroLogin, setSpotifyErroLogin] = useState<string | null>(null)
+  const [modoTV, setModoTV] = useState(() => lerModoTV())
+
+  // Reagenda o lembrete diário na abertura (mantém o timer de sessão vivo).
+  useEffect(() => {
+    const l = lerLembrete()
+    if (l.ativo) agendarLembrete(l.hora)
+  }, [])
 
   // Processa o retorno do login do Spotify logo na abertura do app, qualquer
   // que seja a tela — antes só funcionava se já estivéssemos no pré-treino.
@@ -72,6 +85,11 @@ export default function App() {
     setAjustes(a)
   }
 
+  function mudarModoTV(v: boolean) {
+    gravarModoTV(v)
+    setModoTV(v)
+  }
+
   function mudarNivel(n: Nivel) {
     if (!perfil) return
     const p = { ...perfil, nivel: n }
@@ -89,7 +107,12 @@ export default function App() {
     if (completo && treino) {
       const antes = conquistas(lerHistorico()).map((c) => c.id)
       const minutos = Math.max(1, Math.round(treino.totalSegundos / 60))
-      registrarTreino({ data: hojeISO(), minutos, exercicios: treino.totalExercicios })
+      registrarTreino({
+        data: hojeISO(),
+        minutos,
+        exercicios: treino.totalExercicios,
+        participantes: perfil?.nomes,
+      })
       const depois = conquistas(lerHistorico())
       setNovasConquistas(depois.filter((c) => !antes.includes(c.id)))
       setResumo({ minutos, exercicios: treino.totalExercicios })
@@ -117,7 +140,13 @@ export default function App() {
       )
     case 'treino':
       return treino ? (
-        <Workout treino={treino} ajustes={ajustes} perfil={perfil} aoTerminar={terminarTreino} />
+        <Workout
+          treino={treino}
+          ajustes={ajustes}
+          perfil={perfil}
+          modoTV={modoTV}
+          aoTerminar={terminarTreino}
+        />
       ) : null
     case 'fim':
       return (
@@ -130,12 +159,24 @@ export default function App() {
       )
     case 'biblioteca':
       return <Library aoVoltar={() => setTela('home')} />
+    case 'progresso':
+      return <Progresso perfil={perfil} aoVoltar={() => setTela('home')} />
+    case 'config':
+      return (
+        <Config
+          modoTV={modoTV}
+          aoMudarModoTV={mudarModoTV}
+          aoVoltar={() => setTela('home')}
+        />
+      )
     default:
       return (
         <Home
           perfil={perfil}
           aoTreinar={() => setTela('pre')}
           aoAbrirBiblioteca={() => setTela('biblioteca')}
+          aoAbrirProgresso={() => setTela('progresso')}
+          aoAbrirConfig={() => setTela('config')}
         />
       )
   }
