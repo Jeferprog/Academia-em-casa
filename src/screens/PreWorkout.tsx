@@ -130,6 +130,31 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
         </div>
       </div>
 
+      {perfil.nomes.length > 1 && (
+        <div className="cartao">
+          <h3>👫 Treino em dupla</h3>
+          <div className="chips">
+            <button
+              className={`chip ${!ajustes.revezamento ? 'ativo' : ''}`}
+              onClick={() => muda({ revezamento: false })}
+            >
+              👯 Juntos ao mesmo tempo
+            </button>
+            <button
+              className={`chip ${ajustes.revezamento ? 'ativo' : ''}`}
+              onClick={() => muda({ revezamento: true })}
+            >
+              🔁 Revezamento
+            </button>
+          </div>
+          <small className="nota">
+            {ajustes.revezamento
+              ? `Um faz o exercício enquanto o outro descansa e incentiva. Alterna entre ${perfil.nomes[0]} e ${perfil.nomes[1]} a cada exercício.`
+              : 'Os dois fazem o mesmo exercício ao mesmo tempo, lado a lado.'}
+          </small>
+        </div>
+      )}
+
       <div className="cartao">
         <h3>🔊 Som e voz</h3>
         <div className="chips">

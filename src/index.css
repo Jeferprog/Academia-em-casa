@@ -368,6 +368,17 @@ button {
 .treino-info h2 { margin: 0 0 6px; font-size: 1.4rem; }
 .dica { color: var(--texto2); margin: 0 0 6px; line-height: 1.45; }
 .variacao { color: var(--verde); margin: 0; font-size: 0.92rem; }
+.revezamento-vez {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--texto);
+  background: rgba(124, 227, 139, 0.14);
+  border: 1px solid rgba(124, 227, 139, 0.4);
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+.revezamento-vez strong { color: var(--verde); }
 
 .frase-incentivo {
   background: rgba(124, 227, 139, 0.12);

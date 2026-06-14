@@ -22,6 +22,8 @@ export interface Ajustes {
   /** caminho do Spotify no formato "playlist/ID" (também aceita album/track) */
   spotifyPlaylist: string
   equipamentos: Equipamento[]
+  /** modo revezamento: um faz o exercício enquanto o outro descansa e incentiva */
+  revezamento: boolean
 }
 
 export interface RegistroTreino {
@@ -29,11 +31,20 @@ export interface RegistroTreino {
   minutos: number
   exercicios: number
   sentimento?: string // emoji pós-treino
+  participantes?: string[] // quem treinou (1 = solo, 2 = dupla)
+}
+
+export interface RegistroPeso {
+  data: string // YYYY-MM-DD
+  pessoa: string
+  valor: number // kg
 }
 
 const K_PERFIL = 'aec.perfil'
 const K_AJUSTES = 'aec.ajustes'
 const K_HISTORICO = 'aec.historico'
+const K_PESOS = 'aec.pesos'
+const K_LEMBRETE = 'aec.lembrete'
 
 export const AJUSTES_PADRAO: Ajustes = {
   minutos: 15,
@@ -46,6 +57,7 @@ export const AJUSTES_PADRAO: Ajustes = {
   // playlist "Beast Mode" do próprio Spotify como ponto de partida
   spotifyPlaylist: 'playlist/37i9dQZF1DX76Wlfdnj7AP',
   equipamentos: ['nenhum', 'parede', 'cadeira', 'garrafas'],
+  revezamento: false,
 }
 
 /** Extrai "tipo/id" de um link ou URI do Spotify; null se não reconhecer. */
@@ -138,6 +150,7 @@ export function conquistas(historico: RegistroTreino[]): Conquista[] {
   const n = historico.length
   const streak = calcularStreak(historico)
   const minutosTotais = historico.reduce((s, r) => s + r.minutos, 0)
+  const duplas = historico.filter((r) => (r.participantes?.length ?? 0) >= 2).length
   const lista: Conquista[] = []
   if (n >= 1) lista.push({ id: 'primeiro', titulo: 'Primeiro treino!', emoji: '🌱' })
   if (n >= 3) lista.push({ id: 'tres', titulo: '3 treinos completos', emoji: '🔥' })
@@ -148,5 +161,30 @@ export function conquistas(historico: RegistroTreino[]): Conquista[] {
   if (streak >= 30) lista.push({ id: 'streak30', titulo: '1 mês de sequência!', emoji: '👑' })
   if (minutosTotais >= 60) lista.push({ id: 'hora', titulo: '1 hora acumulada', emoji: '⏰' })
   if (minutosTotais >= 300) lista.push({ id: 'cincohoras', titulo: '5 horas acumuladas', emoji: '🚀' })
+  // Conquistas de dupla (modo casal/família)
+  if (duplas >= 1) lista.push({ id: 'dupla1', titulo: 'Primeiro treino em dupla', emoji: '👫' })
+  if (duplas >= 5) lista.push({ id: 'dupla5', titulo: '5 treinos juntos', emoji: '💞' })
+  if (duplas >= 20) lista.push({ id: 'dupla20', titulo: '20 treinos em dupla', emoji: '🏅' })
   return lista
 }
+
+// --- Registro de peso (opcional, privado, só no aparelho) ---
+
+export const lerPesos = (): RegistroPeso[] => ler<RegistroPeso[]>(K_PESOS) ?? []
+
+export function registrarPeso(r: RegistroPeso) {
+  const pesos = lerPesos().filter((p) => !(p.data === r.data && p.pessoa === r.pessoa))
+  pesos.push(r)
+  pesos.sort((a, b) => a.data.localeCompare(b.data))
+  gravar(K_PESOS, pesos)
+}
+
+// --- Lembrete diário (horário escolhido pelo casal) ---
+
+export interface Lembrete {
+  ativo: boolean
+  hora: string // "HH:MM"
+}
+
+export const lerLembrete = (): Lembrete => ler<Lembrete>(K_LEMBRETE) ?? { ativo: false, hora: '18:00' }
+export const gravarLembrete = (l: Lembrete) => gravar(K_LEMBRETE, l)

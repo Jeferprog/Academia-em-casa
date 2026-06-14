@@ -89,7 +89,12 @@ export default function App() {
     if (completo && treino) {
       const antes = conquistas(lerHistorico()).map((c) => c.id)
       const minutos = Math.max(1, Math.round(treino.totalSegundos / 60))
-      registrarTreino({ data: hojeISO(), minutos, exercicios: treino.totalExercicios })
+      registrarTreino({
+        data: hojeISO(),
+        minutos,
+        exercicios: treino.totalExercicios,
+        participantes: perfil?.nomes,
+      })
       const depois = conquistas(lerHistorico())
       setNovasConquistas(depois.filter((c) => !antes.includes(c.id)))
       setResumo({ minutos, exercicios: treino.totalExercicios })

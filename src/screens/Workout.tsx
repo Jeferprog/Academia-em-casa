@@ -55,6 +55,11 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   // demonstra o atual. Em ambos os casos a animação continua rodando.
   const exibido = ehExercicio ? etapa.exercicio : proxExercicio?.exercicio ?? etapa.exercicio
 
+  // Modo revezamento: alterna quem faz o exercício a cada exercício do circuito.
+  const revezando = ajustes.revezamento && perfil.nomes.length > 1
+  const pessoaAtiva = revezando ? perfil.nomes[(numExercicio - 1) % 2] : null
+  const pessoaTorcendo = revezando ? perfil.nomes[numExercicio % 2] : null
+
   const diz = (texto: string) => {
     if (ajustes.vozLigada) falar(texto)
   }
@@ -186,7 +191,13 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     if (!pular && ajustes.somLigado) bipeTroca()
 
     if (nova.tipo === 'exercicio') {
-      diz(nova.exercicio.nome)
+      if (revezando) {
+        const ord = etapas.slice(0, proximo + 1).filter((e) => e.tipo === 'exercicio').length
+        const quem = perfil.nomes[(ord - 1) % 2]
+        diz(`Vez de ${quem}. ${nova.exercicio.nome}.`)
+      } else {
+        diz(nova.exercicio.nome)
+      }
     } else if (nova.pausaGrande) {
       const seguinte = etapas.slice(proximo + 1).find((e) => e.tipo === 'exercicio')
       const msg = fraseAleatoria('pausaGrande')
@@ -278,6 +289,11 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       <section className="treino-info">
         {ehExercicio ? (
           <>
+            {revezando && (
+              <p className="revezamento-vez">
+                🔁 Vez de <strong>{pessoaAtiva}</strong> · {pessoaTorcendo} incentiva! 👏
+              </p>
+            )}
             <h2>{etapa.exercicio.nome}</h2>
             <p className="dica">{etapa.exercicio.dica}</p>
             <p className="variacao">

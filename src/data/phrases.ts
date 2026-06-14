@@ -49,6 +49,11 @@ export const FRASES = {
     'Descanso especial: recupere o fôlego com calma.',
     'Aproveite essa pausa, vocês merecem. Respira fundo.',
   ],
+  revezamento: [
+    'Agora é a sua vez! O outro descansa e torce.',
+    'Troca! Quem descansou, vai. Quem foi, incentiva!',
+    'Sua vez de brilhar — o parceiro está na torcida!',
+  ],
 }
 
 export function fraseAleatoria(tipo: keyof typeof FRASES): string {
