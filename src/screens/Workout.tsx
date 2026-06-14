@@ -13,6 +13,7 @@ interface Props {
   treino: Treino
   ajustes: Ajustes
   perfil: Perfil
+  modoTV: boolean
   aoTerminar: (completo: boolean) => void
 }
 
@@ -23,7 +24,7 @@ const ESTILO_BLOCO: Record<string, EstiloMusica> = {
   alongamento: 'calma',
 }
 
-export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) {
+export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }: Props) {
   const { etapas } = treino
   const [indice, setIndice] = useState(0)
   const [msRestante, setMsRestante] = useState(etapas[0].segundos * 1000)
@@ -230,6 +231,14 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
     }
   }
 
+  function alternarTelaCheia() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {})
+    }
+  }
+
   const seg = Math.max(0, Math.ceil(msRestante / 1000))
   const fracao = msTotal > 0 ? Math.max(0, msRestante / msTotal) : 0
   const CIRC = 2 * Math.PI * 54
@@ -238,7 +247,7 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
   const ehPausaGrande = !ehExercicio && etapa.pausaGrande
 
   return (
-    <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'}`}>
+    <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'} ${modoTV ? 'modo-tv' : ''}`}>
       <header className="treino-topo">
         <span className="treino-bloco">{NOME_BLOCO[etapa.bloco]}</span>
         <span className="treino-contagem">
@@ -250,6 +259,9 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
           aria-label={musicaOn ? 'Desligar música' : 'Ligar música'}
         >
           {musicaOn ? '🎵' : '🔇'}
+        </button>
+        <button className="btn-fechar" onClick={alternarTelaCheia} aria-label="Tela cheia">
+          📺
         </button>
         <button className="btn-fechar" onClick={sair} aria-label="Encerrar treino">
           ✕

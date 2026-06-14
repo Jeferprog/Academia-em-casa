@@ -188,3 +188,8 @@ export interface Lembrete {
 
 export const lerLembrete = (): Lembrete => ler<Lembrete>(K_LEMBRETE) ?? { ativo: false, hora: '18:00' }
 export const gravarLembrete = (l: Lembrete) => gravar(K_LEMBRETE, l)
+
+// --- Modo TV / tela grande ---
+const K_MODO_TV = 'aec.modoTV'
+export const lerModoTV = (): boolean => ler<boolean>(K_MODO_TV) ?? false
+export const gravarModoTV = (v: boolean) => gravar(K_MODO_TV, v)

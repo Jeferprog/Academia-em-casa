@@ -8,6 +8,7 @@ interface Props {
   aoTreinar: () => void
   aoAbrirBiblioteca: () => void
   aoAbrirProgresso: () => void
+  aoAbrirConfig: () => void
 }
 
 function ultimosDias(n: number): { iso: string; rotulo: string }[] {
@@ -24,7 +25,7 @@ function ultimosDias(n: number): { iso: string; rotulo: string }[] {
   return dias
 }
 
-export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca, aoAbrirProgresso }: Props) {
+export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca, aoAbrirProgresso, aoAbrirConfig }: Props) {
   const historico = lerHistorico()
   const streak = calcularStreak(historico)
   const diasTreinados = new Set(historico.map((r) => r.data))
@@ -38,9 +39,14 @@ export default function Home({ perfil, aoTreinar, aoAbrirBiblioteca, aoAbrirProg
   return (
     <div className="tela home">
       <header className="home-topo">
-        <h1 className="logo">
-          🏠💪 Mexe<span>Junto</span>
-        </h1>
+        <div className="home-topo-linha">
+          <h1 className="logo">
+            🏠💪 Mexe<span>Junto</span>
+          </h1>
+          <button className="btn-fechar" onClick={aoAbrirConfig} aria-label="Configurações">
+            ⚙️
+          </button>
+        </div>
         <p className="saudacao">Olá, {saudacao}! 👋</p>
       </header>
 

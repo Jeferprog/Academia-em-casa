@@ -618,3 +618,33 @@ button {
 .peso-sobe { color: var(--laranja); }
 .grafico-peso { width: 100%; height: auto; margin-top: 6px; }
 .grafico-eixo { fill: var(--texto2); font-size: 8px; }
+
+/* --- Topo da Home com engrenagem --- */
+.home-topo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* --- Configurações --- */
+.input-hora {
+  background: var(--fundo2);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  color: var(--texto);
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+/* --- Modo TV / tela grande --- */
+.treino.modo-tv .treino-bloco { font-size: 1.1rem; padding: 8px 18px; }
+.treino.modo-tv .treino-contagem { font-size: 1.2rem; }
+.treino.modo-tv .avatar-caixa { max-width: 420px; }
+.treino.modo-tv .cronometro-num { font-size: 4rem; }
+.treino.modo-tv .treino-info h2 { font-size: 2.2rem; }
+.treino.modo-tv .dica { font-size: 1.2rem; }
+.treino.modo-tv .variacao { font-size: 1.15rem; }
+.treino.modo-tv .revezamento-vez { font-size: 1.3rem; }
+.treino.modo-tv .proximos-titulo,
+.treino.modo-tv .proximos-lista li { font-size: 1.05rem; }
+.treino.modo-tv .frase-incentivo { font-size: 1.3rem; }
+.treino.modo-tv .btn-controle { font-size: 1.15rem; padding: 18px; }
+@media (min-width: 700px) {
+  .treino.modo-tv { max-width: 900px; margin: 0 auto; }
+}
