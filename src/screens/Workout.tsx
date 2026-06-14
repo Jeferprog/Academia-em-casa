@@ -174,11 +174,8 @@ export default function Workout({ treino, ajustes, perfil, aoTerminar }: Props) 
       return
     }
     const nova = etapas[proximo]
-    // Descanso do circuito usa o valor ajustado ao vivo; pausa grande mantém o seu.
-    const segNova =
-      nova.tipo === 'descanso' && nova.bloco === 'circuito' && !nova.pausaGrande
-        ? segDescanso
-        : nova.segundos
+    // Descansos normais usam o valor ajustado ao vivo; pausa grande mantém o seu.
+    const segNova = nova.tipo === 'descanso' && !nova.pausaGrande ? segDescanso : nova.segundos
     setIndice(proximo)
     setMsRestante(segNova * 1000)
     setMsTotal(segNova * 1000)

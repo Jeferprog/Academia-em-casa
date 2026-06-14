@@ -66,7 +66,7 @@ export function gerarTreino(ajustes: Ajustes, nivel: Nivel): Treino {
   ]
 
   const totalSeg = ajustes.minutos * 60
-  const segAquecimento = aquecimento.length * (30 + 10) // 30s exercício + 10s transição
+  const segAquecimento = aquecimento.length * (30 + ajustes.segDescanso) // 30s exercício + descanso
   const segAlongamento = alongamento.length * (25 + 5)
   const segCircuito = Math.max(0, totalSeg - segAquecimento - segAlongamento)
 
@@ -89,7 +89,7 @@ export function gerarTreino(ajustes: Ajustes, nivel: Nivel): Treino {
   const etapas: Etapa[] = []
   for (const ex of aquecimento) {
     etapas.push({ tipo: 'exercicio', exercicio: ex, segundos: 30, bloco: 'aquecimento' })
-    etapas.push({ tipo: 'descanso', exercicio: ex, segundos: 10, bloco: 'aquecimento' })
+    etapas.push({ tipo: 'descanso', exercicio: ex, segundos: ajustes.segDescanso, bloco: 'aquecimento' })
   }
   // Treinos longos (20+ min) ganham uma pausa maior no meio do circuito:
   // dura o mesmo tempo de um exercício, mas é só descanso para recuperar o fôlego.
