@@ -189,18 +189,23 @@ Casal            { perfis[2], conquistasDeDupla[], desafioDaSemana }
 - [x] Salvamento do progresso no aparelho + streak
 - [x] Deploy no GitHub Pages
 
-### 🟡 Fase 2 — "Treinando junto"
-- [ ] Perfis do casal + conquistas de dupla + modo revezamento
-- [ ] Programa progressivo de 8 semanas
+### 🟡 Fase 2 — "Treinando junto" ✅ CONCLUÍDA
+- [x] Modo casal: conquistas de dupla + modo revezamento (um faz, o outro incentiva)
+- [x] Programa progressivo de 8 semanas ("Do Sofá ao Movimento"), com sugestão de ajustes por semana
 - [x] ~~Música integrada~~ → antecipada para a Fase 1 (trilha gerada no aparelho)
-- [ ] Exercícios com objetos da casa
-- [ ] Calendário, gráficos e registro de peso
-- [ ] Lembrete diário (notificação)
+- [x] Exercícios com objetos da casa (parede, cadeira, garrafas, escada)
+- [x] Calendário do mês, gráfico de minutos por semana e registro de peso por pessoa
+- [x] Lembrete diário (notificação, com horário ajustável)
+
+> Observação: o modo casal trata o casal como dupla treinando junta na mesma
+> tela (espelhado/revezamento). Perfis totalmente separados com login
+> individual ficaram fora do escopo por não combinarem com o uso real (um
+> aparelho, dois treinando juntos).
 
 ### 🔵 Fase 3 — "Capricho"
 - [ ] Avatar 3D personalizável (Mixamo + Three.js)
 - [x] ~~Integração Spotify~~ → antecipada: player embutido com playlist personalizável
-- [ ] Modo TV
+- [x] Modo TV / tela grande (textos e avatar ampliados + tela cheia)
 - [ ] Fotos de progresso
 - [ ] Desafios semanais do casal
 
