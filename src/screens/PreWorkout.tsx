@@ -3,9 +3,10 @@
 
 import { useMemo, useState } from 'react'
 import { EQUIP_INFO, type Equipamento } from '../data/exercises'
+import { progressoPrograma } from '../data/programa'
 import { gerarTreino, materiaisDoTreino } from '../lib/generator'
 import { obterURLLogin } from '../lib/spotifyAuth'
-import { parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
+import { lerHistorico, parseSpotify, type Ajustes, type Nivel, type Perfil } from '../lib/storage'
 
 interface Props {
   perfil: Perfil
@@ -30,6 +31,12 @@ const BLOCO_EMOJI = { aquecimento: '🔥', circuito: '💪', alongamento: '🧘'
 export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyErroLogin, aoMudarAjustes, aoMudarNivel, aoComecar, aoVoltar }: Props) {
   const treino = useMemo(() => gerarTreino(ajustes, perfil.nivel), [ajustes, perfil.nivel])
   const materiais = useMemo(() => materiaisDoTreino(treino), [treino])
+  const prog = useMemo(() => progressoPrograma(lerHistorico().length), [])
+  const semana = prog.semana
+  const segueSugestao =
+    ajustes.minutos === semana.minutos &&
+    ajustes.segExercicio === semana.segExercicio &&
+    ajustes.segDescanso === semana.segDescanso
   const [linkSpotify, setLinkSpotify] = useState('')
   const [linkInvalido, setLinkInvalido] = useState(false)
   const [conectandoSpotify, setConectandoSpotify] = useState(false)
@@ -63,6 +70,32 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
         </button>
         <h2>Treino de hoje</h2>
       </header>
+
+      <div className="cartao sugestao-semana">
+        <div className="programa-topo">
+          <span className="programa-rotulo">📅 Semana {semana.numero} · {semana.titulo}</span>
+        </div>
+        <p className="programa-foco">{semana.foco}</p>
+        <small className="nota">
+          Sugestão de hoje: <strong>{semana.minutos} min</strong> · {semana.segExercicio}s de exercício ·{' '}
+          {semana.segDescanso}s de descanso.
+        </small>
+        {!segueSugestao && (
+          <button
+            className="btn-secundario btn-aplicar-sugestao"
+            onClick={() =>
+              muda({
+                minutos: semana.minutos,
+                segExercicio: semana.segExercicio,
+                segDescanso: semana.segDescanso,
+              })
+            }
+          >
+            ✨ Usar a sugestão da semana
+          </button>
+        )}
+        {segueSugestao && <small className="nota nota-ok">✓ Seguindo a sugestão da semana</small>}
+      </div>
 
       <div className="cartao">
         <h3>⏰ Quanto tempo vocês têm hoje?</h3>

@@ -575,3 +575,46 @@ button {
 .modal h2 { margin: 10px 0 6px; }
 .modal-fechar { position: absolute; top: 12px; right: 12px; }
 .variacoes { padding-left: 18px; line-height: 1.8; color: var(--texto2); }
+
+/* --- Programa de 8 semanas --- */
+.programa-cartao, .sugestao-semana { background: linear-gradient(135deg, rgba(61,214,245,0.10), rgba(124,227,139,0.08)); }
+.programa-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.programa-rotulo { font-size: 0.82rem; color: var(--texto2); font-weight: 600; }
+.programa-semana { font-size: 0.82rem; color: var(--azul); font-weight: 700; white-space: nowrap; }
+.programa-titulo { display: block; font-size: 1.05rem; margin: 6px 0 2px; }
+.programa-foco { color: var(--texto2); margin: 0 0 10px; font-size: 0.9rem; }
+.programa-barra { height: 8px; background: var(--fundo2); border-radius: 99px; overflow: hidden; }
+.programa-barra-fill { height: 100%; background: linear-gradient(90deg, var(--azul), var(--verde)); border-radius: 99px; transition: width 0.4s; }
+.programa-pontos { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.programa-pontos small { color: var(--texto2); margin-left: 4px; }
+.programa-ponto { width: 12px; height: 12px; border-radius: 50%; background: var(--fundo2); border: 1px solid var(--borda); }
+.programa-ponto.feito { background: var(--verde); border-color: var(--verde); }
+.btn-aplicar-sugestao { margin-top: 10px; }
+.nota-ok { color: var(--verde); display: block; margin-top: 8px; }
+
+/* --- Calendário do mês --- */
+.cal-mes-cabecalho, .cal-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-mes-cabecalho { margin-bottom: 6px; }
+.cal-mes-cabecalho span { text-align: center; font-size: 0.7rem; color: var(--texto2); }
+.cal-mes-dia { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.8rem; background: var(--fundo2); color: var(--texto2); }
+.cal-mes-dia.vazia { background: transparent; }
+.cal-mes-dia.feito { background: var(--verde); color: #0f1320; font-weight: 700; }
+.cal-mes-dia.hoje { outline: 2px solid var(--azul); }
+
+/* --- Gráfico de barras (minutos por semana) --- */
+.grafico-barras { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
+.barra-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+.barra-val { width: 100%; min-height: 3px; background: linear-gradient(180deg, var(--verde), var(--azul)); border-radius: 6px 6px 0 0; transition: height 0.4s; }
+.barra-col small { font-size: 0.62rem; color: var(--texto2); }
+
+/* --- Peso --- */
+.peso-form { margin-bottom: 8px; }
+.peso-input { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.peso-input input { flex: 1; min-width: 0; }
+.peso-input span { color: var(--texto2); }
+.peso-pessoa { margin-top: 12px; border-top: 1px solid var(--borda); padding-top: 10px; }
+.peso-pessoa-topo { display: flex; justify-content: space-between; align-items: baseline; }
+.peso-desce { color: var(--verde); }
+.peso-sobe { color: var(--laranja); }
+.grafico-peso { width: 100%; height: auto; margin-top: 6px; }
+.grafico-eixo { fill: var(--texto2); font-size: 8px; }

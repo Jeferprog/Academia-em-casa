@@ -19,10 +19,11 @@ import Done from './screens/Done'
 import Home from './screens/Home'
 import Library from './screens/Library'
 import PreWorkout from './screens/PreWorkout'
+import Progresso from './screens/Progresso'
 import Setup from './screens/Setup'
 import Workout from './screens/Workout'
 
-type Tela = 'setup' | 'home' | 'pre' | 'treino' | 'fim' | 'biblioteca'
+type Tela = 'setup' | 'home' | 'pre' | 'treino' | 'fim' | 'biblioteca' | 'progresso'
 
 // Há um código de retorno do login do Spotify na URL? (?code=...)
 const temCodigoSpotify = new URLSearchParams(window.location.search).has('code')
@@ -135,12 +136,15 @@ export default function App() {
       )
     case 'biblioteca':
       return <Library aoVoltar={() => setTela('home')} />
+    case 'progresso':
+      return <Progresso perfil={perfil} aoVoltar={() => setTela('home')} />
     default:
       return (
         <Home
           perfil={perfil}
           aoTreinar={() => setTela('pre')}
           aoAbrirBiblioteca={() => setTela('biblioteca')}
+          aoAbrirProgresso={() => setTela('progresso')}
         />
       )
   }
