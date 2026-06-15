@@ -79,3 +79,71 @@ export function cancelarLembrete(): void {
       .catch(() => {})
   }
 }
+
+// --- Lembrete acoplado ao sistema, via calendário (.ics) ---
+// Um PWA não acorda o celular sozinho com o app fechado. A forma confiável é
+// entregar um evento de calendário com alarme diário recorrente: quem dispara a
+// notificação no horário passa a ser o próprio sistema (Google/Apple Agenda),
+// mesmo com o app fechado e offline.
+
+const K_UID = 'aec.lembrete.uid'
+
+function uidEstavel(): string {
+  let uid = localStorage.getItem(K_UID)
+  if (!uid) {
+    uid = `mexejunto-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@mexejunto.app`
+    localStorage.setItem(K_UID, uid)
+  }
+  return uid
+}
+
+// Gera o conteúdo .ics com um evento diário recorrente que toca no horário.
+export function gerarICS(hora: string): string {
+  const [h, m] = hora.split(':').map(Number)
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  // DTSTART em horário "flutuante" (sem fuso): o calendário usa o horário local
+  // do aparelho, que é exatamente o que queremos.
+  const inicio = new Date()
+  inicio.setHours(h, m, 0, 0)
+  const local = (d: Date) =>
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`
+
+  const agora = new Date()
+  const utc = `${agora.getUTCFullYear()}${pad(agora.getUTCMonth() + 1)}${pad(agora.getUTCDate())}T${pad(agora.getUTCHours())}${pad(agora.getUTCMinutes())}${pad(agora.getUTCSeconds())}Z`
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//MexeJunto//Lembrete de Treino//PT-BR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uidEstavel()}`,
+    `DTSTAMP:${utc}`,
+    `DTSTART:${local(inicio)}`,
+    'RRULE:FREQ=DAILY',
+    'SUMMARY:Hora do treino! 💪 MexeJunto',
+    'DESCRIPTION:Bora se mexer? Abra o MexeJunto e faça o treino de hoje.',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Hora do treino!',
+    'TRIGGER:-PT0M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n')
+}
+
+// Baixa/abre o .ics — no celular, isso abre o app de calendário para adicionar.
+export function baixarLembreteICS(hora: string): void {
+  const blob = new Blob([gerarICS(hora)], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'mexejunto-lembrete.ics'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.setTimeout(() => URL.revokeObjectURL(url), 2000)
+}
