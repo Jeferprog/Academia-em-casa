@@ -154,6 +154,12 @@ export async function pausarMusica(): Promise<void> {
   await player.pause()
 }
 
+// Pula para a próxima faixa da playlist.
+export async function proximaMusica(): Promise<void> {
+  if (!player) return
+  await player.nextTrack()
+}
+
 export async function retomar(): Promise<void> {
   if (!player) return
   await player.resume()

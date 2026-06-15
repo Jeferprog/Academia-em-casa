@@ -25,9 +25,64 @@ export interface Exercicio {
   /** chave da animação do avatar (ver src/avatar/poses.ts) */
   anim: string
   variacoes: { facil: string; medio: string; dificil: string }
+  /** Trabalha um lado de cada vez (uma perna/um braço): o treino faz os dois lados em seguida. */
+  unilateral?: boolean
+  /** Alongamento leve feito no começo do treino (pescoço/costas/pernas). */
+  alongamentoInicial?: boolean
 }
 
 export const EXERCICIOS: Exercicio[] = [
+  // ─── ALONGAMENTO DE INÍCIO (pescoço, costas, pernas) ───────────
+  // Movimentos leves no começo, para soltar o corpo antes do esforço.
+  {
+    id: 'solta-pescoco',
+    nome: 'Soltar o pescoço',
+    dica: 'Incline a cabeça para um lado, segure um pouco, e troque. Bem devagar, sem forçar.',
+    musculos: 'Pescoço',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'neck-stretch',
+    alongamentoInicial: true,
+    variacoes: {
+      facil: 'Só incline a cabeça de leve para cada lado',
+      medio: 'Use a mão para alongar um pouco mais',
+      dificil: 'Segure uns 10s de cada lado, respirando fundo',
+    },
+  },
+  {
+    id: 'giro-de-tronco',
+    nome: 'Giro de tronco',
+    dica: 'Pés afastados, gire o tronco de um lado para o outro deixando os braços soltos.',
+    musculos: 'Costas, coluna',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'torso-twist',
+    alongamentoInicial: true,
+    variacoes: {
+      facil: 'Giros pequenos e lentos',
+      medio: 'Gire um pouco mais, olhando para trás',
+      dificil: 'Amplitude maior, em ritmo constante',
+    },
+  },
+  {
+    id: 'balanco-de-perna',
+    nome: 'Balanço de perna',
+    dica: 'Segure em algo firme e balance uma perna para frente e para trás; depois troque.',
+    musculos: 'Pernas, quadril',
+    categoria: 'aquecimento',
+    equipamento: 'nenhum',
+    impacto: 'baixo',
+    anim: 'leg-swing',
+    alongamentoInicial: true,
+    variacoes: {
+      facil: 'Balanço pequeno, sempre com apoio',
+      medio: 'Amplitude média, controlado',
+      dificil: 'Amplitude maior, sem perder o equilíbrio',
+    },
+  },
+
   // ─── AQUECIMENTO ───────────────────────────────────────────────
   {
     id: 'marcha-estacionaria',
@@ -231,16 +286,17 @@ export const EXERCICIOS: Exercicio[] = [
   {
     id: 'afundo',
     nome: 'Afundo (passada)',
-    dica: 'Dê um passo à frente e desça o joelho de trás. Tronco reto.',
+    dica: 'Dê um passo à frente e desça o joelho de trás. Tronco reto. Faça primeiro um lado, depois o outro.',
     musculos: 'Pernas, glúteos',
     categoria: 'pernas',
     equipamento: 'nenhum',
     impacto: 'baixo',
     anim: 'lunge',
+    unilateral: true,
     variacoes: {
       facil: 'Desça pouco, apoie a mão na parede',
       medio: 'Desça até o joelho quase tocar o chão',
-      dificil: 'Alterne as pernas sem parar',
+      dificil: 'Desça mais fundo, subida controlada',
     },
   },
   {
