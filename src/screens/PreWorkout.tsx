@@ -303,6 +303,7 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
             <li key={`${e.exercicio.id}-${i}`}>
               <span className="bloco-emoji">{BLOCO_EMOJI[e.bloco]}</span>
               {e.exercicio.nome}
+              {e.lado ? ` (lado ${e.lado})` : ''}
               <small> · {e.segundos}s</small>
             </li>
           ))}

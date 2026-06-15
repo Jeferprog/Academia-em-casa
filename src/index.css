@@ -721,3 +721,33 @@ button {
 .btn-calendario { margin-top: 12px; width: 100%; font-size: 1rem; }
 .lembrete-secundario { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--borda); }
 .lembrete-secundario span { color: var(--texto2); font-size: 0.9rem; }
+
+/* --- Lado (exercícios unilaterais) e skip do Spotify --- */
+.lado-badge {
+  margin: 0 0 6px;
+  display: inline-block;
+  font-size: 0.95rem;
+  color: var(--azul);
+  background: rgba(61, 214, 245, 0.12);
+  border: 1px solid rgba(61, 214, 245, 0.4);
+  border-radius: 12px;
+  padding: 4px 12px;
+}
+.lado-badge strong { text-transform: capitalize; }
+.spotify-tocando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.btn-spotify-skip {
+  background: var(--fundo2);
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.btn-spotify-skip:active { transform: scale(0.95); }

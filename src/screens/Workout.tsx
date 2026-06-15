@@ -180,8 +180,10 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
       return
     }
     const nova = etapas[proximo]
-    // Descansos normais usam o valor ajustado ao vivo; pausa grande mantém o seu.
-    const segNova = nova.tipo === 'descanso' && !nova.pausaGrande ? segDescanso : nova.segundos
+    // Descansos normais usam o valor ajustado ao vivo; pausa grande e troca de
+    // lado mantêm a própria duração.
+    const segNova =
+      nova.tipo === 'descanso' && !nova.pausaGrande && !nova.trocaLado ? segDescanso : nova.segundos
     setIndice(proximo)
     setMsRestante(segNova * 1000)
     setMsTotal(segNova * 1000)
@@ -192,13 +194,17 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
     if (!pular && ajustes.somLigado) bipeTroca()
 
     if (nova.tipo === 'exercicio') {
+      const sufLado = nova.lado ? ` — lado ${nova.lado}` : ''
       if (revezando) {
         const ord = etapas.slice(0, proximo + 1).filter((e) => e.tipo === 'exercicio').length
         const quem = perfil.nomes[(ord - 1) % 2]
-        diz(`Vez de ${quem}. ${nova.exercicio.nome}.`)
+        diz(`Vez de ${quem}. ${nova.exercicio.nome}${sufLado}.`)
       } else {
-        diz(nova.exercicio.nome)
+        diz(`${nova.exercicio.nome}${sufLado}.`)
       }
+    } else if (nova.trocaLado) {
+      mostrarFrase('Troca de lado! 🔄', false)
+      diz('Troca de lado! Agora o outro lado.')
     } else if (nova.pausaGrande) {
       const seguinte = etapas.slice(proximo + 1).find((e) => e.tipo === 'exercicio')
       const msg = fraseAleatoria('pausaGrande')
@@ -245,6 +251,7 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
   const progresso = ((indice + 1) / etapas.length) * 100
   const variacao = modoFacil ? etapa.exercicio.variacoes.facil : etapa.exercicio.variacoes[perfil.nivel]
   const ehPausaGrande = !ehExercicio && etapa.pausaGrande
+  const ehTrocaLado = !ehExercicio && etapa.trocaLado
 
   return (
     <div className={`treino ${ehExercicio ? 'fase-exercicio' : 'fase-descanso'} ${modoTV ? 'modo-tv' : ''}`}>
@@ -275,7 +282,9 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
       <main className="treino-centro">
         <div className="avatar-caixa">
           {!ehExercicio && (
-            <span className="proximo-badge">{ehPausaGrande ? '🌬️ PAUSA' : '⏭ PRÓXIMO'}</span>
+            <span className="proximo-badge">
+              {ehPausaGrande ? '🌬️ PAUSA' : ehTrocaLado ? '🔄 TROCA' : '⏭ PRÓXIMO'}
+            </span>
           )}
           <Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />
         </div>
@@ -306,6 +315,9 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
                 🔁 Vez de <strong>{pessoaAtiva}</strong> · {pessoaTorcendo} incentiva! 👏
               </p>
             )}
+            {etapa.lado && (
+              <p className="lado-badge">🦵 Lado <strong>{etapa.lado}</strong></p>
+            )}
             <h2>{etapa.exercicio.nome}</h2>
             <p className="dica">{etapa.exercicio.dica}</p>
             <p className="variacao">
@@ -313,12 +325,22 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
               {variacao}
             </p>
           </>
+        ) : ehTrocaLado ? (
+          <>
+            <h2>Troca de lado! 🔄</h2>
+            {proxExercicio && (
+              <p className="dica">
+                Agora o lado <strong>{proxExercicio.lado}</strong>: {proxExercicio.exercicio.nome}
+              </p>
+            )}
+          </>
         ) : (
           <>
             <h2>{ehPausaGrande ? 'Pausa para respirar 🌬️' : 'Respira… 😮‍💨'}</h2>
             {proxExercicio && (
               <p className="dica">
                 Próximo: <strong>{proxExercicio.exercicio.nome}</strong>
+                {proxExercicio.lado ? ` (lado ${proxExercicio.lado})` : ''}
               </p>
             )}
           </>
@@ -368,7 +390,16 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
           {spotifyErro ? (
             <div className="nota nota-erro">⚠️ {spotifyErro}</div>
           ) : spotifyPronto ? (
-            <div className="nota">🎵 Spotify tocando com volume controlado automaticamente</div>
+            <div className="spotify-tocando">
+              <span className="nota">🎵 Spotify tocando · volume automático</span>
+              <button
+                className="btn-spotify-skip"
+                onClick={() => spotifyPlayer.proximaMusica().catch(() => {})}
+                aria-label="Passar para a próxima música"
+              >
+                ⏭ Passar música
+              </button>
+            </div>
           ) : (
             <div className="nota">⏳ Iniciando Spotify...</div>
           )}

@@ -356,6 +356,39 @@ export const ANIMACOES: Record<string, AnimDef> = {
     ],
     dur: [2500, 2500],
   },
+
+  // Soltar o pescoço: leva uma das mãos perto da cabeça e inclina de leve, alternando.
+  'neck-stretch': {
+    frames: [
+      p({ rUpper: 150, rFore: 118, lUpper: 8, lFore: 8, hipX: 96 }),
+      p({}),
+      p({ lUpper: 150, lFore: 118, rUpper: -8, rFore: -8, hipX: 104 }),
+      p({}),
+    ],
+    dur: [1100, 500, 1100, 500],
+  },
+
+  // Giro de tronco: braços soltos acompanham a rotação de um lado para o outro.
+  'torso-twist': {
+    frames: [
+      p({ torso: 8, hipX: 94, lUpper: 80, lFore: 95, rUpper: 60, rFore: 30 }),
+      p({ torso: 6 }),
+      p({ torso: 8, hipX: 106, rUpper: -80, rFore: -95, lUpper: -60, lFore: -30 }),
+      p({ torso: 6 }),
+    ],
+    dur: [700, 300, 700, 300],
+  },
+
+  // Balanço de perna: uma perna vai à frente e atrás (mobilidade de quadril).
+  'leg-swing': {
+    frames: [
+      p({ lThigh: 55, lShin: 12, lUpper: -14, lFore: -14, rUpper: 24, rFore: 24, hipX: 96 }),
+      p({ hipX: 96 }),
+      p({ lThigh: -34, lShin: -10, lUpper: 24, lFore: 24, rUpper: 24, rFore: 24, hipX: 96 }),
+      p({ hipX: 96 }),
+    ],
+    dur: [550, 250, 550, 250],
+  },
 }
 
 export const animOuPadrao = (chave: string): AnimDef => ANIMACOES[chave] ?? ANIMACOES['march']
