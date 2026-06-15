@@ -716,3 +716,8 @@ button {
   text-transform: uppercase;
   color: var(--texto2);
 }
+
+/* --- Lembrete via calendário --- */
+.btn-calendario { margin-top: 12px; width: 100%; font-size: 1rem; }
+.lembrete-secundario { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--borda); }
+.lembrete-secundario span { color: var(--texto2); font-size: 0.9rem; }

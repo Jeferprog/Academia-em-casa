@@ -1,7 +1,13 @@
-// Configurações: lembrete diário de treino (notificação) e modo TV.
+// Configurações: lembrete diário de treino (calendário do sistema) e modo TV.
 
 import { useState } from 'react'
-import { agendarLembrete, cancelarLembrete, pedirPermissao, suportaNotificacao } from '../lib/lembrete'
+import {
+  agendarLembrete,
+  baixarLembreteICS,
+  cancelarLembrete,
+  pedirPermissao,
+  suportaNotificacao,
+} from '../lib/lembrete'
 import { gravarLembrete, lerLembrete } from '../lib/storage'
 
 interface Props {
@@ -53,10 +59,28 @@ export default function Config({ modoTV, aoMudarModoTV, aoVoltar }: Props) {
 
       <div className="cartao">
         <h3>⏰ Lembrete diário</h3>
-        {podeNotificar ? (
+        <div className="ajuste-linha">
+          <span>Horário</span>
+          <input
+            type="time"
+            value={lembrete.hora}
+            onChange={(e) => mudarHora(e.target.value)}
+            className="input-hora"
+          />
+        </div>
+        <button className="btn-principal btn-calendario" onClick={() => baixarLembreteICS(lembrete.hora)}>
+          📅 Adicionar ao calendário do celular
+        </button>
+        <small className="nota">
+          Cria um alarme diário no calendário do seu telefone. Quem avisa no horário passa a ser o
+          próprio sistema — então funciona <strong>mesmo com o app fechado</strong> e sem internet.
+          Se mudar o horário, toque de novo e apague o evento antigo no calendário.
+        </small>
+
+        {podeNotificar && (
           <>
-            <div className="ajuste-linha">
-              <span>Receber lembrete de treino</span>
+            <div className="ajuste-linha lembrete-secundario">
+              <span>Avisar também aqui, só com o app aberto</span>
               <button
                 className={`chip ${lembrete.ativo ? 'ativo' : ''}`}
                 onClick={() => alternarLembrete(!lembrete.ativo)}
@@ -64,25 +88,8 @@ export default function Config({ modoTV, aoMudarModoTV, aoVoltar }: Props) {
                 {lembrete.ativo ? '🔔 Ligado' : '🔕 Desligado'}
               </button>
             </div>
-            <div className="ajuste-linha">
-              <span>Horário</span>
-              <input
-                type="time"
-                value={lembrete.hora}
-                onChange={(e) => mudarHora(e.target.value)}
-                className="input-hora"
-              />
-            </div>
             {aviso && <small className="nota">{aviso}</small>}
-            <small className="nota">
-              Para o lembrete chegar mesmo com o app fechado, instale o MexeJunto na tela inicial
-              (menu do navegador → "Adicionar à tela inicial").
-            </small>
           </>
-        ) : (
-          <small className="nota nota-erro">
-            Este navegador não permite notificações. Tente instalar o app na tela inicial.
-          </small>
         )}
       </div>
 
