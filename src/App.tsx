@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { gerarTreino, type Treino } from './lib/generator'
 import { agendarLembrete } from './lib/lembrete'
 import { estaConectado, processarCallback } from './lib/spotifyAuth'
@@ -19,6 +19,7 @@ import {
   type Nivel,
   type Perfil,
 } from './lib/storage'
+import BottomNav from './screens/BottomNav'
 import Config from './screens/Config'
 import Done from './screens/Done'
 import Home from './screens/Home'
@@ -124,9 +125,10 @@ export default function App() {
 
   if (!perfil || tela === 'setup') return <Setup aoConcluir={concluirSetup} />
 
+  let corpo: ReactNode
   switch (tela) {
     case 'pre':
-      return (
+      corpo = (
         <PreWorkout
           perfil={perfil}
           ajustes={ajustes}
@@ -138,8 +140,9 @@ export default function App() {
           aoVoltar={() => setTela('home')}
         />
       )
+      break
     case 'treino':
-      return treino ? (
+      corpo = treino ? (
         <Workout
           treino={treino}
           ajustes={ajustes}
@@ -148,8 +151,9 @@ export default function App() {
           aoTerminar={terminarTreino}
         />
       ) : null
+      break
     case 'fim':
-      return (
+      corpo = (
         <Done
           minutos={resumo.minutos}
           exercicios={resumo.exercicios}
@@ -157,27 +161,38 @@ export default function App() {
           aoVoltar={() => setTela('home')}
         />
       )
+      break
     case 'biblioteca':
-      return <Library aoVoltar={() => setTela('home')} />
+      corpo = <Library aoVoltar={() => setTela('home')} />
+      break
     case 'progresso':
-      return <Progresso perfil={perfil} aoVoltar={() => setTela('home')} />
+      corpo = <Progresso perfil={perfil} aoVoltar={() => setTela('home')} />
+      break
     case 'config':
-      return (
-        <Config
-          modoTV={modoTV}
-          aoMudarModoTV={mudarModoTV}
-          aoVoltar={() => setTela('home')}
-        />
+      corpo = (
+        <Config modoTV={modoTV} aoMudarModoTV={mudarModoTV} aoVoltar={() => setTela('home')} />
       )
+      break
     default:
-      return (
+      corpo = (
         <Home
           perfil={perfil}
           aoTreinar={() => setTela('pre')}
           aoAbrirBiblioteca={() => setTela('biblioteca')}
-          aoAbrirProgresso={() => setTela('progresso')}
-          aoAbrirConfig={() => setTela('config')}
         />
       )
   }
+
+  // A barra inferior só aparece nas telas de navegação (não nos fluxos de foco).
+  const abasNav: Tela[] = ['home', 'pre', 'progresso', 'config']
+  const mostrarNav = abasNav.includes(tela)
+
+  return (
+    <div className={mostrarNav ? 'com-bottom-nav' : undefined}>
+      {corpo}
+      {mostrarNav && (
+        <BottomNav ativo={tela as 'home' | 'pre' | 'progresso' | 'config'} aoNavegar={setTela} />
+      )}
+    </div>
+  )
 }
