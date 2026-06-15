@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Academia em Casa - Workout Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#a48c7f",
+                        "surface-container": "#1b1f2d",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-high": "#262937",
+                        "background": "#0f1320",
+                        "tertiary": "#75dc85",
+                        "primary-container": "#ff8c42",
+                        "on-background": "#dfe1f4",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#303443",
+                        "on-secondary": "#003640",
+                        "tertiary-container": "#59bf6c",
+                        "on-tertiary-container": "#004a1b",
+                        "inverse-primary": "#9b4500",
+                        "tertiary-fixed-dim": "#75dc85",
+                        "inverse-on-surface": "#2c303e",
+                        "primary-fixed": "#ffdbc9",
+                        "on-surface": "#dfe1f4",
+                        "error-container": "#93000a",
+                        "secondary-fixed-dim": "#40d8f7",
+                        "surface-variant": "#303443",
+                        "on-surface-variant": "#ddc1b3",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "surface-container-low": "#171b28",
+                        "secondary": "#44dafa",
+                        "secondary-container": "#00bedd",
+                        "on-tertiary": "#003913",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#aaedff",
+                        "surface-container-lowest": "#0a0e1a",
+                        "primary": "#ffb68d",
+                        "inverse-surface": "#dfe1f4",
+                        "surface-tint": "#ffb68d",
+                        "on-secondary-container": "#004855",
+                        "on-primary": "#532200",
+                        "on-primary-fixed-variant": "#763300",
+                        "surface-dim": "#0f1320",
+                        "surface": "#0f1320",
+                        "primary-fixed-dim": "#ffb68d",
+                        "tertiary-fixed": "#91f99e",
+                        "outline-variant": "#564338",
+                        "on-tertiary-fixed": "#002108",
+                        "on-primary-container": "#6a2d00",
+                        "surface-bright": "#353947",
+                        "on-tertiary-fixed-variant": "#00531f",
+                        "on-primary-fixed": "#331200",
+                        "border-steel": "#2c3558"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "14px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "element-gap": "8px",
+                        "container-max": "560px",
+                        "container-tv": "900px"
+                    },
+                    "fontFamily": {
+                        "headline-xl-mobile": ["Hanken Grotesk"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "timer-display": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-xl-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "headline-xl": ["35px", {"lineHeight": "1.2", "letterSpacing": "-0.5px", "fontWeight": "800"}],
+                        "timer-display": ["48px", {"lineHeight": "1.0", "letterSpacing": "-1px", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "800"}],
+                        "body-sm": ["13.5px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["22px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "label-caps": ["11.5px", {"lineHeight": "1.0", "letterSpacing": "1px", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f1320;
+            color: #dfe1f4;
+            font-family: 'Hanken Grotesk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2c3558;
+            border-radius: 10px;
+        }
+        .card-gradient-overlay {
+            background: linear-gradient(to top, rgba(15, 19, 32, 0.9) 0%, rgba(15, 19, 32, 0.4) 50%, transparent 100%);
+        }
+        .animate-slide-up {
+            animation: slideUp 0.25s ease-out forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(8px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="dark bg-background min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-background border-b border-outline-variant">
+<div class="flex justify-between items-center px-gutter h-16 max-w-container-max mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-border-steel flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDiD2v8L9flOve5Y5aIkEAdH7fQgUnaVR6fkq5V8Xf9d2xdDzHvq08Hl-IEB4VSz98lvCTqhfo0xskp6HnPt1cHbG3h3KrU5JWuuLymEYG4JxNhl3cMPOCbQd0PzJgHiXUhct3fdyDLIyQxlBjtggs0Dvi10zb3MYAoMyVzjgooAesqwtlWIs-ObgnhjZ9iJn21pmGIRuKAZl9_5a3NU3bMHgJjmwoiG-x4N5KXVe4CmuBmVVzXCfGZMTZwUWnsNVUQdSvVAm4-lc"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-black text-primary">Academia em Casa</h1>
+</div>
+<button class="text-on-surface-variant hover:opacity-80 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Container -->
+<main class="max-w-container-max mx-auto pt-20 px-gutter space-y-stack-gap animate-slide-up">
+<!-- Search Bar -->
+<section class="mt-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container border border-border-steel rounded-xl py-4 pl-12 pr-4 font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Buscar treinos..." type="text"/>
+</div>
+</section>
+<!-- Category Filters -->
+<section class="overflow-x-auto custom-scrollbar whitespace-nowrap -mx-gutter px-gutter pb-2">
+<div class="flex gap-2">
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded-full active:scale-95 transition-transform">TODOS</button>
+<button class="bg-surface-container border border-border-steel text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-full hover:bg-surface-container-high active:scale-95 transition-transform">HIIT</button>
+<button class="bg-surface-container border border-border-steel text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-full hover:bg-surface-container-high active:scale-95 transition-transform">YOGA</button>
+<button class="bg-surface-container border border-border-steel text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-full hover:bg-surface-container-high active:scale-95 transition-transform">FORÇA</button>
+<button class="bg-surface-container border border-border-steel text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-full hover:bg-surface-container-high active:scale-95 transition-transform">CARDIO</button>
+<button class="bg-surface-container border border-border-steel text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-full hover:bg-surface-container-high active:scale-95 transition-transform">MOBILIDADE</button>
+</div>
+</section>
+<!-- Workout Grid -->
+<section class="grid grid-cols-2 gap-stack-gap">
+<!-- Card 1: HIIT -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A dynamic action shot of a high-intensity interval training session in a moody, dark-mode gym setting. A fit individual is mid-jump, surrounded by high-energy lighting in neon orange and deep blue tones. The atmosphere is cinematic and focused, highlighting sweat and intense physical exertion with sharp, athletic clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGkGn3rY6n9k9gVqkVhfZ8E8ZnqBuZZhr3IwhpXOWeOxjw6a27KSGBjCXNaMPL05BU2aK4SZtX52cd1yQFQ2pTKHXlg4mBOiZ3z65Tu9GJ5zqHSSMxLnFWDsFPuzHkdf7-HWuQzgsrRuoKfg2MduQAWj0HotbdK1vgXy0kgNexUNrC5Rtiu3b-C4Tb59A0y9g3Uk1TiRyljB-ScVftoz1PsXogCsVxSbtPJ1ZNFmEgcGZElCg-mGw3N-jj-1N-j9hIPqvE1j4zvy0"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-primary/20 backdrop-blur-md px-2 py-1 rounded-md border border-primary/30">
+<span class="font-label-caps text-[10px] text-primary">HIIT</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">HIIT Intenso</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 25 min</span>
+<span class="font-body-sm text-body-sm text-tertiary">Avançado</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Yoga -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A serene morning yoga session in a minimalist studio illuminated by soft, atmospheric morning light. A practitioner is in a perfect balance pose, creating a silhouette against a large window. The color palette is composed of deep midnight blues and calming lavender accents, emphasizing tranquility, flexibility, and physical mindfulness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWk30fV-P392XMosbtiQGJe0UZaddBawqmSy8v3nr1CnrdrtlPx3kxtFQGqv0LNop7vAOZ-CvAyitdX50to3mFpsltVdzv-cGKWYCA3G1pkZM8mrtDmCgRwEhFE2ra7S3aKmv7EfaCtl0wZe7y7ToY6AWa1-htvP-9l8uOhMY7UeDsLDzMqobRtq5blZK-2xBLpTqw-0O8x0Dx7X_EGrbMcNgIIldF0boET-A8jkMegY6XbFWKAoClwbETSu3CtAUifTRGZqD6jJU"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-secondary/20 backdrop-blur-md px-2 py-1 rounded-md border border-secondary/30">
+<span class="font-label-caps text-[10px] text-secondary">YOGA</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">Yoga Matinal</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 40 min</span>
+<span class="font-body-sm text-body-sm text-secondary">Iniciante</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Força -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A professional weightlifting setup in a high-end athletic cockpit environment. Close-up on a barbell with heavy plates, with intense rim lighting emphasizing metallic textures. The background is a deep, immersive midnight blue, punctuated by sharp, kinetic green accents. The overall mood is one of rugged strength and physical urgency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARbNPgOXLWO2J4fuO-u-HlleND7xi1iszu0HC1HL3-EvnJ0c7ZyXLLEDRjIWoTCvqblV9wYW7Zvk3hI9gGho5yKUYBPDGrAVD5MA4_-81Wd71TO0nwKO8AMORgrLhmvhYORwZRmIDDCrnaOiWtFj3E91nObx5rl3evOOQxDcMHzHeIObGk9UJ6IYvLipAbw6k6fPi1TCanC8ZeGTJYB78l2QgBfbjvr64cechlqGxVuBPzVcAs43wDIHGDh7NRMDHQaOU12-ZY0Aw"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-primary-container/20 backdrop-blur-md px-2 py-1 rounded-md border border-primary-container/30">
+<span class="font-label-caps text-[10px] text-primary-container">FORÇA</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">Superior Power</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 50 min</span>
+<span class="font-body-sm text-body-sm text-primary">Intermediário</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Cardio -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A high-energy cardio running scene captured with motion blur to convey speed and kinetic energy. The runner is an athletic silhouette against an urban sunrise background, with vibrant neon light trails in lava orange piercing the atmospheric dark-mode palette. The composition feels sturdy and reliable, projecting a sense of goal-driven athletic presence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLZmSh9o13BV0iHIUZNDLWCgwcqCLTRBBCwNCy3OZZ5_di51M02TMHKYGLLvyqMnXMxveaO1VQtIAd26YFPjwjQ8kLZVkyLWJaecGj0NzXYfkXBBFFUd1Q_VztCoPv-HHVPoVG8iKP5ioAhcV7hbbmZZR2qLWSt8tcJnqLDDwUgSs7XGkVhot1iWJZjX4I3GtfJ5rLMiNsaYgg9R46DttntAVu-_Pl6LNsOJd85wJqMfT8G0GSE6ljhrC7ATpl25A2JNfMYkVaFgk"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-tertiary/20 backdrop-blur-md px-2 py-1 rounded-md border border-tertiary/30">
+<span class="font-label-caps text-[10px] text-tertiary">CARDIO</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">Pique Explosivo</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 15 min</span>
+<span class="font-body-sm text-body-sm text-tertiary">Avançado</span>
+</div>
+</div>
+</div>
+<!-- Card 5: Core -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A focused core workout session featuring an athlete performing a plank. The lighting is low-contrast with atmospheric glow focusing on the muscle definition. The design utilizes midnight blue foundation with high-luminance green piercing the dark canvas to signal active effort. Extreme legibility and physical accessibility are the focus of this elite athletic cockpit aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTNTQXPWFE3EEJDzmHNCruoQCawKLMYQbEA7VgMbmSQgOYiepvO-yumt-O14a-p3JibiS9aIUMkRLgzbi_jVesVdBgEjoqZ2npLga-l0CEr0AezfMtNCCbMWkdlZB_DHnXVIjy13r6lJVo6KV0dSATZZkgW1XRUduF55uoGSNVJ0YD2C-5yg3eKYsPJBffG8PASCrsr3n_Hh5gCAbjuJ8BWP_hWX2-WQ51O1dDldP5mrW_TzG1hL1wBInb9arRuAi0Z4xDRsPnW_8"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-secondary-container/20 backdrop-blur-md px-2 py-1 rounded-md border border-secondary-container/30">
+<span class="font-label-caps text-[10px] text-secondary">CORE</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">Abdômen de Aço</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 20 min</span>
+<span class="font-body-sm text-body-sm text-primary">Intermediário</span>
+</div>
+</div>
+</div>
+<!-- Card 6: Recovery -->
+<div class="relative group bg-surface-container-high border border-border-steel rounded-xl overflow-hidden active:scale-95 transition-transform">
+<div class="aspect-square bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A relaxation and recovery session after a high-intensity workout. Soft, cool lighting with deep nocturnal foundations create a focused, distraction-free environment for post-exercise stretching. Subtle ambient shadows simulate a neon glow around the primary subject, reinforcing the modern corporate-gamer fusion aesthetic of the premium athletic app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8T0OHzPiljUY_hLVKATy1iAyd9-3Cvhxy9n8fTFqvKgMxZRGtSCpja9AnePfxgFHFKvjDgp3wqIzCh1uMZspV0ckzGRTTdsD4pu9YKlaQW0EVus_3bhZcE7IxxOXn5DIz17sGCbA0jNR3QDVi6AVLycrOdP7LXkWl5sIMOL-yic7CFeZyoB8fRSNS7SQFRjiwxkiKnsHjakoMFFeUFObLyNyrcwYFX1NKii_C71puGlst8IpsyBJ3XurOI2ifo5y13PS6BfUsFj4"/>
+<div class="absolute inset-0 card-gradient-overlay"></div>
+<div class="absolute top-2 right-2 bg-on-surface-variant/20 backdrop-blur-md px-2 py-1 rounded-md border border-on-surface-variant/30">
+<span class="font-label-caps text-[10px] text-on-surface-variant">RECOVERY</span>
+</div>
+</div>
+<div class="p-3 absolute bottom-0 w-full">
+<h3 class="font-body-lg text-body-lg text-on-surface leading-tight">Soltura Total</h3>
+<div class="flex items-center justify-between mt-1 opacity-80">
+<span class="font-body-sm text-body-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 10 min</span>
+<span class="font-body-sm text-body-sm text-secondary">Iniciante</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recommended Promo Card -->
+<section class="mt-4">
+<div class="relative rounded-2xl p-6 overflow-hidden border border-border-steel bg-[#1d2440]">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+<div class="relative z-10 flex items-center justify-between">
+<div class="space-y-2">
+<span class="font-label-caps text-label-caps text-primary tracking-widest">PLANO PERSONALIZADO</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Treino do Dia</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px]">Baseado no seu progresso em Força e Cardio.</p>
+<button class="mt-4 bg-gradient-to-r from-primary to-[#ff8c42] text-on-primary font-body-lg text-body-sm px-6 py-3 rounded-full font-extrabold active:scale-95 transition-all shadow-[0_0_15px_rgba(255,107,53,0.35)]">INICIAR AGORA</button>
+</div>
+<div class="w-24 h-24 flex items-center justify-center">
+<span class="material-symbols-outlined text-[64px] text-primary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface-container border-t border-outline-variant">
+<div class="flex justify-around items-center h-20 px-4 max-w-container-max mx-auto">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<!-- Workouts (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-primary font-800 scale-110 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</a>
+<!-- Progress -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-label-caps mt-1">Progress</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for filter chips
+        const chips = document.querySelectorAll('button.font-label-caps');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-primary', 'text-on-primary');
+                    c.classList.add('bg-surface-container', 'border', 'border-border-steel', 'text-on-surface-variant');
+                });
+                chip.classList.add('bg-primary', 'text-on-primary');
+                chip.classList.remove('bg-surface-container', 'border', 'border-border-steel', 'text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

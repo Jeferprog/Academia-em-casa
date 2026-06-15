@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Academia em Casa - Detalhes do Treino</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline": "#a48c7f",
+            "surface-container": "#1b1f2d",
+            "on-error-container": "#ffdad6",
+            "on-secondary-fixed": "#001f26",
+            "surface-container-high": "#262937",
+            "background": "#0f1320",
+            "tertiary": "#75dc85",
+            "primary-container": "#ff8c42",
+            "on-background": "#dfe1f4",
+            "error": "#ffb4ab",
+            "surface-container-highest": "#303443",
+            "on-secondary": "#003640",
+            "tertiary-container": "#59bf6c",
+            "on-tertiary-container": "#004a1b",
+            "inverse-primary": "#9b4500",
+            "tertiary-fixed-dim": "#75dc85",
+            "inverse-on-surface": "#2c303e",
+            "primary-fixed": "#ffdbc9",
+            "on-surface": "#dfe1f4",
+            "error-container": "#93000a",
+            "secondary-fixed-dim": "#40d8f7",
+            "surface-variant": "#303443",
+            "on-surface-variant": "#ddc1b3",
+            "on-secondary-fixed-variant": "#004e5c",
+            "surface-container-low": "#171b28",
+            "secondary": "#44dafa",
+            "secondary-container": "#00bedd",
+            "on-tertiary": "#003913",
+            "on-error": "#690005",
+            "secondary-fixed": "#aaedff",
+            "surface-container-lowest": "#0a0e1a",
+            "primary": "#ffb68d",
+            "inverse-surface": "#dfe1f4",
+            "surface-tint": "#ffb68d",
+            "on-secondary-container": "#004855",
+            "on-primary": "#532200",
+            "on-primary-fixed-variant": "#763300",
+            "surface-dim": "#0f1320",
+            "surface": "#0f1320",
+            "primary-fixed-dim": "#ffb68d",
+            "tertiary-fixed": "#91f99e",
+            "outline-variant": "#564338",
+            "on-tertiary-fixed": "#002108",
+            "on-primary-container": "#6a2d00",
+            "surface-bright": "#353947",
+            "on-tertiary-fixed-variant": "#00531f",
+            "on-primary-fixed": "#331200"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "stack-gap": "14px",
+            "gutter": "16px",
+            "unit": "4px",
+            "element-gap": "8px",
+            "container-max": "560px",
+            "container-tv": "900px"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Hanken Grotesk"],
+            "headline-xl": ["Hanken Grotesk"],
+            "timer-display": ["Hanken Grotesk"],
+            "body-lg": ["Hanken Grotesk"],
+            "body-sm": ["Hanken Grotesk"],
+            "headline-lg": ["Hanken Grotesk"],
+            "label-caps": ["Hanken Grotesk"],
+            "body-md": ["Hanken Grotesk"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "800"}],
+            "headline-xl": ["35px", {"lineHeight": "1.2", "letterSpacing": "-0.5px", "fontWeight": "800"}],
+            "timer-display": ["48px", {"lineHeight": "1.0", "letterSpacing": "-1px", "fontWeight": "900"}],
+            "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "800"}],
+            "body-sm": ["13.5px", {"lineHeight": "1.5", "fontWeight": "400"}],
+            "headline-lg": ["22px", {"lineHeight": "1.3", "fontWeight": "700"}],
+            "label-caps": ["11.5px", {"lineHeight": "1.0", "letterSpacing": "1px", "fontWeight": "800"}],
+            "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #0f1320;
+      color: #dfe1f4;
+      font-family: 'Hanken Grotesk', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-effect {
+      background: rgba(29, 36, 64, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid #2c3558;
+    }
+    .lava-gradient {
+      background: linear-gradient(135deg, #ffb68d 0%, #ff8c42 100%);
+    }
+    .scroll-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .timer-ring {
+      transition: stroke-dashoffset 0.3s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body class="bg-background min-h-screen pb-32">
+<!-- TopAppBar Anchor -->
+<header class="fixed top-0 w-full z-50 bg-background border-b border-outline-variant">
+<div class="flex justify-between items-center px-gutter h-16 max-w-container-max mx-auto">
+<div class="flex items-center gap-element-gap">
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-black text-primary">Academia em Casa</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a fit athlete with a determined expression, wearing high-performance athletic gear. The lighting is dramatic and moody, reflecting a professional gym environment with cool blue tones and sharp highlights. The overall aesthetic is clean, modern, and energetic, following the brand's premium dark mode theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASC6mBr_BgMAdbzqNzh5hLzSIWKLj7CH36SjqCE-PIS7JDpQ3FNYWIBzMxHSEgHqOlhyCYLTF01ci2-50TF3pa2alQNnqr8Zt4LQsYcRYGbWR0-darm9B1Qtgh5LjL2C8Q5p-TYSXciR3i9_wAdeC45t38RcDXO9n7jCXHeFuhsfyFfhuGnTuojSqw8yKPgCESACt4-h0EhpZZhik8O7Ji1PrOqOUjpQLuR_ogeoXugEyXIetlHttNih6gPyfpzLJHnqdsZIGaXyM"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto pt-16 px-gutter flex flex-col gap-stack-gap">
+<!-- Hero Section -->
+<section class="relative w-full aspect-video rounded-xl overflow-hidden border border-outline-variant mt-4 shadow-2xl">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl7WqQTnhoxFxEzNE1Esqjn2a75ncrh8ZdbLaT2J05vk8runWiNckgdhMVCpSxzX-3CDTdQFsUK_d8UdhhmDsF-pYWEpCduLeSpJd7e2dWxsZ5MELFv3yVfUo3QBpi_DM-GcZeiVABdyDL2bqybS7i-uC8ewIQuQiDvJPSDDOvZsiH5EOycQIw4PVWs5qJzqbiiDOR_bSNk0Mpxf_6Xk6xSZfq9_QkDz3qK6csnhvJZXZ1HUXz5Y8FdzWxAd1sKMRk-hGhz-gGmJw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<div class="flex gap-2 mb-2">
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps border border-primary/30">INTERMEDIÁRIO</span>
+<span class="bg-tertiary/20 text-tertiary px-3 py-1 rounded-full font-label-caps text-label-caps border border-tertiary/30">PERNAS</span>
+</div>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Agachamento com Barra</h2>
+</div>
+</section>
+<!-- Stats & Timer Row -->
+<div class="grid grid-cols-2 gap-stack-gap">
+<!-- Info Card -->
+<div class="bg-surface-container-high rounded-xl p-4 border border-outline-variant flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">reorder</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SÉRIES E REPS</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">3</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">séries</span>
+<span class="mx-2 text-outline-variant">|</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">12</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">reps</span>
+</div>
+</div>
+<!-- Timer Widget -->
+<div class="bg-surface-container-high rounded-xl p-4 border border-outline-variant flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute top-2 left-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DESCANSO</span>
+</div>
+<div class="relative w-16 h-16 mt-2">
+<svg class="w-full h-full">
+<circle class="text-surface-variant" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary timer-ring" cx="32" cy="32" fill="transparent" id="timer-progress" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="44" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-timer-display text-lg text-primary">45s</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Instructions Checklist -->
+<section class="bg-surface-container rounded-xl p-5 border border-outline-variant flex flex-col gap-4">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface border-b border-outline-variant pb-2">Instruções</h3>
+<div class="space-y-4">
+<!-- Item 1 -->
+<label class="flex items-start gap-4 group cursor-pointer">
+<div class="relative flex items-center justify-center mt-1">
+<input class="peer appearance-none w-6 h-6 border-2 border-primary rounded-lg bg-transparent checked:bg-primary transition-all cursor-pointer" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-primary opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none text-[18px]" style="font-variation-settings: 'wght' 800;">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface group-hover:text-primary transition-colors">Posicionamento</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pés afastados na largura dos ombros, barra apoiada no trapézio.</p>
+</div>
+</label>
+<!-- Item 2 -->
+<label class="flex items-start gap-4 group cursor-pointer">
+<div class="relative flex items-center justify-center mt-1">
+<input class="peer appearance-none w-6 h-6 border-2 border-primary rounded-lg bg-transparent checked:bg-primary transition-all cursor-pointer" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-primary opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none text-[18px]" style="font-variation-settings: 'wght' 800;">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface group-hover:text-primary transition-colors">Descida Controlada</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Agache empurrando os quadris para trás, mantendo as costas retas.</p>
+</div>
+</label>
+<!-- Item 3 -->
+<label class="flex items-start gap-4 group cursor-pointer">
+<div class="relative flex items-center justify-center mt-1">
+<input class="peer appearance-none w-6 h-6 border-2 border-primary rounded-lg bg-transparent checked:bg-primary transition-all cursor-pointer" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-primary opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none text-[18px]" style="font-variation-settings: 'wght' 800;">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface group-hover:text-primary transition-colors">Amplitude</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Desça até que as coxas fiquem pelo menos paralelas ao chão.</p>
+</div>
+</label>
+<!-- Item 4 -->
+<label class="flex items-start gap-4 group cursor-pointer">
+<div class="relative flex items-center justify-center mt-1">
+<input class="peer appearance-none w-6 h-6 border-2 border-primary rounded-lg bg-transparent checked:bg-primary transition-all cursor-pointer" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-primary opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none text-[18px]" style="font-variation-settings: 'wght' 800;">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface group-hover:text-primary transition-colors">Respiração</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Inspire ao descer, expire com força ao subir para estabilidade.</p>
+</div>
+</label>
+</div>
+</section>
+<!-- Gamified Progress Bar -->
+<div class="mt-2">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Progressão Semanal</span>
+<span class="font-label-caps text-label-caps text-on-surface">65%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden border border-outline-variant/30">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[65%] rounded-full shadow-[0_0_8px_rgba(68,218,250,0.5)]"></div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation / Action Container -->
+<footer class="fixed bottom-0 w-full z-50 bg-surface-container/90 backdrop-blur-md">
+<div class="max-w-container-max mx-auto px-gutter py-6 flex flex-col gap-4">
+<button class="lava-gradient w-full py-5 rounded-xl font-headline-lg-mobile text-headline-lg-mobile text-on-primary font-black shadow-[0_4px_20px_rgba(255,140,66,0.4)] active:scale-[0.97] transition-all duration-200 uppercase tracking-wider flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+        Iniciar Treino
+      </button>
+<!-- Fake Nav for visual completeness -->
+<div class="flex justify-around items-center h-12">
+<button class="flex flex-col items-center justify-center text-primary scale-110">
+<span class="material-symbols-outlined">home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">fitness_center</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">monitoring</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</div>
+</footer>
+<script>
+    // Simple micro-interaction for the checkboxes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (this.checked) {
+          this.parentElement.parentElement.classList.add('opacity-50');
+          this.parentElement.parentElement.style.textDecoration = 'line-through';
+        } else {
+          this.parentElement.parentElement.classList.remove('opacity-50');
+          this.parentElement.parentElement.style.textDecoration = 'none';
+        }
+      });
+    });
+
+    // Animate the timer ring subtly
+    let offset = 44;
+    const ring = document.getElementById('timer-progress');
+    setInterval(() => {
+      offset = offset <= 0 ? 175.9 : offset - 0.5;
+      ring.setAttribute('stroke-dashoffset', offset);
+    }, 100);
+  </script>
+</body></html>
