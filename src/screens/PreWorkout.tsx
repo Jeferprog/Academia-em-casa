@@ -53,8 +53,6 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
     })
   }
 
-  const ehCelular = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-
   const conectarSpotify = async () => {
     setConectandoSpotify(true)
     const url = await obterURLLogin()
@@ -222,14 +220,7 @@ export default function PreWorkout({ perfil, ajustes, spotifyConectado, spotifyE
             🔇 Sem música
           </button>
         </div>
-        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && ehCelular && (
-          <small className="nota nota-erro">
-            ⚠️ No celular, o Spotify dentro do app não toca (o Spotify não libera isso em
-            navegadores de celular, só em computador). Use a "🎹 Trilha do app" — também abaixa
-            para a voz e funciona offline.
-          </small>
-        )}
-        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && !ehCelular && (
+        {ajustes.musicaLigada && ajustes.fonteMusica === 'spotify' && (
           <>
             {!spotifyConectado ? (
               <>
