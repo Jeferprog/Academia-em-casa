@@ -89,6 +89,24 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     chao.receiveShadow = true
     scene.add(chao)
 
+    // Cadeira (cenário): aparece nos exercícios com prop 'cadeira' (tríceps na
+    // cadeira, agachamento na cadeira). O manequim olha para +Z, então a cadeira
+    // fica ATRÁS dele (-Z). É um apoio estilizado, como o desenho do avatar SVG.
+    const cadeira = new THREE.Group()
+    const matMovel = new THREE.MeshStandardMaterial({ color: 0x3a4570, roughness: 0.8 })
+    const parte = (w: number, h: number, d: number, x: number, y: number, z: number) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), matMovel)
+      m.position.set(x, y, z)
+      m.castShadow = true
+      cadeira.add(m)
+    }
+    parte(0.44, 0.06, 0.4, 0, 0.48, -0.48) // assento
+    parte(0.44, 0.46, 0.06, 0, 0.72, -0.65) // encosto
+    for (const sx of [-0.18, 0.18])
+      for (const sz of [-0.32, -0.64]) parte(0.05, 0.46, 0.05, sx, 0.23, sz) // pernas
+    cadeira.visible = false
+    scene.add(cadeira)
+
     const bones: Record<string, THREE.Object3D> = {}
     let hipsBaseY = 0
     let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
@@ -151,14 +169,19 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     function aplicarBraco(lado: 'Left' | 'Right', upper: number, fore: number) {
       const braco = b(lado + 'Arm')
       const ante = b(lado + 'ForeArm')
-      if (!braco) return
+      if (!braco || !braco.parent) return
       const qLower = lado === 'Left' ? qLowerL : qLowerR
-      // braço (ombro): baixa do T e balança pelo ângulo "upper"
+      // O ângulo do braço é ABSOLUTO em relação à vertical (mesma convenção do
+      // avatar SVG): NÃO herda a inclinação do tronco. Por isso montamos a
+      // orientação-mundo desejada (baixar do T + balançar) e descontamos o mundo
+      // do pai (ombro/coluna) para virar rotação local. Sem isso, exercícios de
+      // chão (ponte, prancha) saíam com os braços para o lado errado.
       _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * upper * DEG)
-      braco.quaternion.copy(_qSwing).multiply(qLower)
+      _qWorld.copy(_qSwing).multiply(qLower)
+      braco.parent.getWorldQuaternion(_qParent)
+      braco.quaternion.copy(_qParent).invert().multiply(_qWorld)
       if (ante) {
-        // antebraço (cotovelo): mesmo esquema com o ângulo "fore"; convertemos a
-        // orientação-mundo desejada para local usando o mundo real do pai.
+        // antebraço (cotovelo): mesma ideia com o ângulo "fore".
         _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * fore * DEG)
         _qWorld.copy(_qSwing).multiply(qLower)
         braco.getWorldQuaternion(_qParent)
@@ -260,6 +283,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       const dt = relogio.getDelta() * 1000
       if (rodandoRef.current) t += dt
       aplicar(poseAtual())
+      cadeira.visible = animRef.current.prop === 'cadeira'
       renderer.render(scene, camera)
     }
     loop()

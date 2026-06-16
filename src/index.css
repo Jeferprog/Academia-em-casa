@@ -668,6 +668,27 @@ button {
   .treino.modo-tv { max-width: 900px; margin: 0 auto; }
 }
 
+/* --- Tela deitada (celular na horizontal / espelhado na TV) --- */
+/* Em paisagem o celular fica largo e BAIXO (~360px de altura). O layout em
+   coluna não cabe, então encolhemos a vertical: avatar e cronômetro lado a
+   lado dimensionados pela altura (vh), textos menores e escondemos a lista
+   "A seguir" para sobrar espaço aos controles. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .treino { padding: 8px 16px 10px; gap: 6px; }
+  .treino-centro { gap: 18px; }
+  .avatar-caixa { max-width: 46vh; }
+  .avatar-3d,
+  .treino.modo-tv .avatar-3d { height: 44vh; }
+  .cronometro { flex: 0 0 auto; width: 30vh; max-width: 30vh; }
+  .cronometro-num { font-size: 2.4rem; }
+  .treino-info { min-height: 0; }
+  .treino-info h2 { font-size: 1.25rem; margin-bottom: 2px; }
+  .dica,
+  .variacao { font-size: 0.85rem; margin-bottom: 2px; }
+  .proximos { display: none; }
+  .btn-controle { padding: 10px 8px; }
+}
+
 /* --- Barra de navegação inferior (Kinetic Midnight) --- */
 .com-bottom-nav .tela { padding-bottom: 96px; }
 .bottom-nav {
