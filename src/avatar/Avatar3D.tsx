@@ -22,6 +22,7 @@ const SINAL_JOELHO = -1 // dobra do joelho (mesmo eixo da perna)
 const SINAL_TORSO = 1 // inclinação do tronco para frente
 const ESCALA_TRONCO = 0.45 // o quanto a inclinação se distribui na coluna
 const TWIST_TRONCO_GRAUS = 5 // intensidade do giro de tronco (eixo vertical)
+const CALCANHAR_GRAUS = 42 // flexão do tornozelo ao subir na ponta dos pés
 
 interface Props {
   anim: string
@@ -90,6 +91,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
     const bones: Record<string, THREE.Object3D> = {}
     let hipsBaseY = 0
+    let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
     // O three.js remove ":" e outros caracteres dos nomes ("mixamorig:LeftArm"
     // vira "mixamorigLeftArm"), então normalizamos (só letras/números) para achar.
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -114,7 +116,13 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           if (o.isBone) bones[norm(o.name)] = o
         })
         scene.add(modelo)
-        if (b('Hips')) hipsBaseY = b('Hips').position.y
+        modelo.updateMatrixWorld(true)
+        if (b('Hips')) {
+          hipsBaseY = b('Hips').position.y
+          const ws = new THREE.Vector3()
+          b('Hips').getWorldScale(ws)
+          escalaModelo = ws.y || 1
+        }
       },
       undefined,
       (err) => console.error('Falha ao carregar avatar 3D:', err),
@@ -206,6 +214,28 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       aplicarBraco('Right', p.rUpper, p.rFore)
       aplicarPerna('Left', p.lThigh, p.lShin)
       aplicarPerna('Right', p.rThigh, p.rShin)
+
+      // Pés: em repouso ficam planos. Só o "balanço de calcanhares" os usa, então
+      // zeramos sempre (para não travarem flexionados ao trocar de exercício).
+      zerar('LeftFoot'); zerar('RightFoot')
+      zerar('LeftToeBase'); zerar('RightToeBase')
+      if (nomeRef.current === 'calf-raise') {
+        // Subir na ponta dos pés: o tornozelo flexiona (calcanhar sobe) enquanto
+        // a ponta do pé fica colada no chão. Para isso giramos o pé no tornozelo,
+        // contra-giramos os dedos (ficam planos) e subimos o quadril o tanto que
+        // a "bola" do pé desceria — assim a ponta não atravessa o chão. Os números
+        // (0.087/0.107) são o vetor tornozelo→bola medido no próprio GLB.
+        const lift = Math.min(1, Math.max(0, (120 - p.hipY) / 7))
+        const th = lift * CALCANHAR_GRAUS * DEG
+        for (const lado of ['Left', 'Right'] as const) {
+          const pe = b(lado + 'Foot')
+          const dedo = b(lado + 'ToeBase')
+          if (pe) pe.rotation.x = th
+          if (dedo) dedo.rotation.x = -th
+        }
+        const ballDrop = 0.087 * (Math.cos(th) - 1) + 0.107 * Math.sin(th)
+        b('Hips').position.y = hipsBaseY + ballDrop / escalaModelo
+      }
     }
 
     // Tempo/posição na nossa sequência de poses (mesma lógica do avatar SVG)
