@@ -751,3 +751,7 @@ button {
   font-weight: 700;
 }
 .btn-spotify-skip:active { transform: scale(0.95); }
+
+/* --- Avatar 3D (experimental) --- */
+.avatar-3d { width: 100%; height: 260px; display: block; }
+.treino.modo-tv .avatar-3d { height: 360px; }

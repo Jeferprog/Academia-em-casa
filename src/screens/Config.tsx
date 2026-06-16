@@ -8,7 +8,7 @@ import {
   pedirPermissao,
   suportaNotificacao,
 } from '../lib/lembrete'
-import { gravarLembrete, lerLembrete } from '../lib/storage'
+import { gravarAvatar3D, gravarLembrete, lerAvatar3D, lerLembrete } from '../lib/storage'
 
 interface Props {
   modoTV: boolean
@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function Config({ modoTV, aoMudarModoTV, aoVoltar }: Props) {
+  const [avatar3D, setAvatar3D] = useState(() => lerAvatar3D())
   const [lembrete, setLembrete] = useState(() => lerLembrete())
   const [aviso, setAviso] = useState<string | null>(null)
   const podeNotificar = suportaNotificacao()
@@ -91,6 +92,28 @@ export default function Config({ modoTV, aoMudarModoTV, aoVoltar }: Props) {
             {aviso && <small className="nota">{aviso}</small>}
           </>
         )}
+      </div>
+
+      <div className="cartao">
+        <h3>🧍 Avatar 3D <small>(experimental)</small></h3>
+        <div className="ajuste-linha">
+          <span>Mostrar o boneco em 3D durante o treino</span>
+          <button
+            className={`chip ${avatar3D ? 'ativo' : ''}`}
+            onClick={() => {
+              const v = !avatar3D
+              setAvatar3D(v)
+              gravarAvatar3D(v)
+            }}
+          >
+            {avatar3D ? '🧍 Ligado' : 'Desligado'}
+          </button>
+        </div>
+        <small className="nota">
+          Em testes! Um personagem 3D de verdade fazendo os exercícios. Pode ficar pesado em
+          aparelhos antigos e os movimentos ainda estão sendo ajustados — se algo parecer estranho,
+          me conte o que viu.
+        </small>
       </div>
 
       <div className="cartao">
