@@ -17,8 +17,8 @@ const DEG = Math.PI / 180
 
 // --- Ajustes de mapeamento (inverter sinal se o membro for para o lado errado) ---
 const SINAL_BRACO_FRENTE = -1 // balanço do braço para frente/trás (eixo X)
-const SINAL_PERNA_FRENTE = 1 // balanço da perna para frente/trás (eixo X)
-const SINAL_JOELHO = -1 // dobra do joelho
+const SINAL_PERNA_FRENTE = -1 // balanço da perna para frente/trás (eixo X)
+const SINAL_JOELHO = -1 // dobra do joelho (mesmo eixo da perna)
 const SINAL_COTOVELO = -1 // dobra do cotovelo
 const SINAL_TORSO = 1 // inclinação do tronco para frente
 const BRACO_BAIXAR_GRAUS = 78 // tira o braço do T-pose e deixa ao lado do corpo
@@ -33,10 +33,12 @@ interface Props {
 export default function Avatar3D({ anim, rodando = true, className }: Props) {
   const mountRef = useRef<HTMLDivElement>(null)
   const animRef = useRef<AnimDef>(animOuPadrao(anim))
+  const nomeRef = useRef(anim)
   const rodandoRef = useRef(rodando)
 
   useEffect(() => {
     animRef.current = animOuPadrao(anim)
+    nomeRef.current = anim
   }, [anim])
   useEffect(() => {
     rodandoRef.current = rodando
@@ -161,6 +163,16 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       const lean = SINAL_TORSO * p.torso * ESCALA_TRONCO * DEG
       if (b('Spine')) b('Spine').rotation.x = lean
       if (b('Spine1')) b('Spine1').rotation.x = lean * 0.7
+
+      // Pescoço: nossa animação "soltar o pescoço" não tem ângulo de pescoço —
+      // ela inclina o corpo via hipX (96..104). Usamos isso para a cabeça pender.
+      zerar('Neck')
+      zerar('Head')
+      if (nomeRef.current === 'neck-stretch') {
+        const tilt = (p.hipX - 100) * 7 * DEG
+        if (b('Neck')) b('Neck').rotation.z = tilt * 0.5
+        if (b('Head')) b('Head').rotation.z = tilt * 0.7
+      }
 
       aplicarBraco('Left', p.lUpper, p.lFore, +1)
       aplicarBraco('Right', p.rUpper, p.rFore, -1)
