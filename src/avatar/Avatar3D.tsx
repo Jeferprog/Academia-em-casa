@@ -133,8 +133,10 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       const ante = b(lado + 'ForeArm')
       if (braco) {
         braco.rotation.set(0, 0, 0)
-        braco.rotation.z = sinalZ * BRACO_BAIXAR_GRAUS * DEG
-        braco.rotation.x = SINAL_BRACO_FRENTE * upper * DEG
+        // Pose angles: 0° = down, 90° = T-pose horizontal, 180° = up, 270° = back
+        // Model starts in T-pose, so offset by -90° to make pose 0° = actual down
+        braco.rotation.x = SINAL_BRACO_FRENTE * (upper - 90) * DEG
+        braco.rotation.z = sinalZ * (upper < 90 ? (90 - upper) * 0.3 : (upper > 90 ? (upper - 90) * 0.3 : 0)) * DEG
       }
       if (ante) {
         ante.rotation.set(0, 0, 0)
