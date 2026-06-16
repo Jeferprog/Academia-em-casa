@@ -341,12 +341,16 @@ export const ANIMACOES: Record<string, AnimDef> = {
     dur: [900, 1600, 900, 300],
   },
 
+  // Alongar a coxa da frente: puxa um pé de cada vez (segura com a mão do
+  // mesmo lado), alternando as duas pernas.
   'stretch-quad': {
     frames: [
       p({ lThigh: -10, lShin: -148, lUpper: -52, lFore: -132, rUpper: 60, rFore: 65, rThigh: 0, rShin: 0 }),
       p({ lThigh: -12, lShin: -152, lUpper: -54, lFore: -136, rUpper: 64, rFore: 70, rThigh: 0, rShin: 0, hipY: 119 }),
+      p({ rThigh: -10, rShin: -148, rUpper: -52, rFore: -132, lUpper: 60, lFore: 65, lThigh: 0, lShin: 0 }),
+      p({ rThigh: -12, rShin: -152, rUpper: -54, rFore: -136, lUpper: 64, lFore: 70, lThigh: 0, lShin: 0, hipY: 119 }),
     ],
-    dur: [900, 900],
+    dur: [900, 900, 900, 900],
   },
 
   'breathe': {
@@ -368,26 +372,30 @@ export const ANIMACOES: Record<string, AnimDef> = {
     dur: [1100, 500, 1100, 500],
   },
 
-  // Giro de tronco: braços soltos acompanham a rotação de um lado para o outro.
+  // Giro de tronco: braços ficam parados (à frente) e acompanham o giro do corpo;
+  // só o tronco gira de um lado para o outro (via hipX, tratado no avatar).
   'torso-twist': {
     frames: [
-      p({ torso: 8, hipX: 94, lUpper: 80, lFore: 95, rUpper: 60, rFore: 30 }),
-      p({ torso: 6 }),
-      p({ torso: 8, hipX: 106, rUpper: -80, rFore: -95, lUpper: -60, lFore: -30 }),
-      p({ torso: 6 }),
+      p({ torso: 8, hipX: 94, lUpper: 78, lFore: 78, rUpper: 74, rFore: 74 }),
+      p({ torso: 6, hipX: 100, lUpper: 78, lFore: 78, rUpper: 74, rFore: 74 }),
+      p({ torso: 8, hipX: 106, lUpper: 78, lFore: 78, rUpper: 74, rFore: 74 }),
+      p({ torso: 6, hipX: 100, lUpper: 78, lFore: 78, rUpper: 74, rFore: 74 }),
     ],
     dur: [700, 300, 700, 300],
   },
 
-  // Balanço de perna: uma perna vai à frente e atrás (mobilidade de quadril).
+  // Balanço de perna: cada perna vai à frente e atrás (mobilidade de quadril).
+  // Primeiro a esquerda (apoiado na direita), depois a direita.
   'leg-swing': {
     frames: [
-      p({ lThigh: 55, lShin: 12, lUpper: -14, lFore: -14, rUpper: 24, rFore: 24, hipX: 96 }),
-      p({ hipX: 96 }),
-      p({ lThigh: -34, lShin: -10, lUpper: 24, lFore: 24, rUpper: 24, rFore: 24, hipX: 96 }),
-      p({ hipX: 96 }),
+      p({ lThigh: 55, lShin: 12, lUpper: -14, lFore: -14, rUpper: 24, rFore: 24 }), // esq. frente
+      p({ lThigh: -34, lShin: -10, lUpper: 24, lFore: 24, rUpper: 24, rFore: 24 }), // esq. trás
+      p({}), // neutro
+      p({ rThigh: 55, rShin: 12, rUpper: -14, rFore: -14, lUpper: 24, lFore: 24 }), // dir. frente
+      p({ rThigh: -34, rShin: -10, rUpper: 24, rFore: 24, lUpper: 24, lFore: 24 }), // dir. trás
+      p({}), // neutro
     ],
-    dur: [550, 250, 550, 250],
+    dur: [550, 550, 250, 550, 550, 250],
   },
 }
 
