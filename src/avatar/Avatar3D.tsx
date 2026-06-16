@@ -19,9 +19,7 @@ const DEG = Math.PI / 180
 const SINAL_BRACO_FRENTE = -1 // balanço do braço para frente/trás (eixo X)
 const SINAL_PERNA_FRENTE = -1 // balanço da perna para frente/trás (eixo X)
 const SINAL_JOELHO = -1 // dobra do joelho (mesmo eixo da perna)
-const SINAL_COTOVELO = -1 // dobra do cotovelo
 const SINAL_TORSO = 1 // inclinação do tronco para frente
-const BRACO_BAIXAR_GRAUS = 78 // tira o braço do T-pose e deixa ao lado do corpo
 const ESCALA_TRONCO = 0.45 // o quanto a inclinação se distribui na coluna
 const TWIST_TRONCO_GRAUS = 5 // intensidade do giro de tronco (eixo vertical)
 
@@ -128,19 +126,35 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       if (o) o.rotation.set(0, 0, 0)
     }
 
-    function aplicarBraco(lado: 'Left' | 'Right', upper: number, fore: number, sinalZ: number) {
+    // O manequim começa em T-pose: o braço aponta para +X (esquerdo) / -X (direito).
+    // Nossa convenção de pose é 0°=para baixo, 90°=para frente, 180°=para cima.
+    // Então: (1) "baixamos" o braço 90° em torno de Z (sai do T e aponta -Y) e
+    // (2) "balançamos" no plano sagital (Y-Z) em torno de X. A composição via
+    // quaternion deixa a ordem das rotações sem ambiguidade. Valores conferidos
+    // medindo a posição da mão no próprio GLB (eixos de repouso = eixos do mundo).
+    const EIXO_X = new THREE.Vector3(1, 0, 0)
+    const EIXO_Z = new THREE.Vector3(0, 0, 1)
+    const qLowerL = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, -90 * DEG)
+    const qLowerR = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, 90 * DEG)
+    const _qSwing = new THREE.Quaternion()
+    const _qWorld = new THREE.Quaternion()
+    const _qParent = new THREE.Quaternion()
+
+    function aplicarBraco(lado: 'Left' | 'Right', upper: number, fore: number) {
       const braco = b(lado + 'Arm')
       const ante = b(lado + 'ForeArm')
-      if (braco) {
-        braco.rotation.set(0, 0, 0)
-        // Pose angles: 0° = down, 90° = T-pose horizontal, 180° = up, 270° = back
-        // Model starts in T-pose, so offset by -90° to make pose 0° = actual down
-        braco.rotation.x = SINAL_BRACO_FRENTE * (upper - 90) * DEG
-        braco.rotation.z = sinalZ * (upper < 90 ? (90 - upper) * 0.3 : (upper > 90 ? (upper - 90) * 0.3 : 0)) * DEG
-      }
+      if (!braco) return
+      const qLower = lado === 'Left' ? qLowerL : qLowerR
+      // braço (ombro): baixa do T e balança pelo ângulo "upper"
+      _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * upper * DEG)
+      braco.quaternion.copy(_qSwing).multiply(qLower)
       if (ante) {
-        ante.rotation.set(0, 0, 0)
-        ante.rotation.x = SINAL_COTOVELO * (fore - upper) * DEG
+        // antebraço (cotovelo): mesmo esquema com o ângulo "fore"; convertemos a
+        // orientação-mundo desejada para local usando o mundo real do pai.
+        _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * fore * DEG)
+        _qWorld.copy(_qSwing).multiply(qLower)
+        braco.getWorldQuaternion(_qParent)
+        ante.quaternion.copy(_qParent.invert()).multiply(_qWorld)
       }
     }
 
@@ -188,8 +202,8 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         if (b('Head')) b('Head').rotation.z = tilt * 0.7
       }
 
-      aplicarBraco('Left', p.lUpper, p.lFore, +1)
-      aplicarBraco('Right', p.rUpper, p.rFore, -1)
+      aplicarBraco('Left', p.lUpper, p.lFore)
+      aplicarBraco('Right', p.rUpper, p.rFore)
       aplicarPerna('Left', p.lThigh, p.lShin)
       aplicarPerna('Right', p.rThigh, p.rShin)
     }
