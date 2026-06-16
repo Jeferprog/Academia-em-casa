@@ -23,10 +23,7 @@ const SINAL_COTOVELO = -1 // dobra do cotovelo
 const SINAL_TORSO = 1 // inclinação do tronco para frente
 const BRACO_BAIXAR_GRAUS = 78 // tira o braço do T-pose e deixa ao lado do corpo
 const ESCALA_TRONCO = 0.45 // o quanto a inclinação se distribui na coluna
-// Nossos movimentos são no plano lateral (frente/trás). Visto de lado, o
-// exercício fica muito mais claro do que de frente. Giro o personagem para
-// quase-perfil (ajuste o ângulo se quiser virar mais/menos ou para o outro lado).
-const VISTA_LATERAL_GRAUS = -80
+const TWIST_TRONCO_GRAUS = 5 // intensidade do giro de tronco (eixo vertical)
 
 interface Props {
   anim: string
@@ -59,7 +56,9 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(32, larg() / alt(), 0.1, 100)
-    camera.position.set(0, 1.35, 4.4)
+    // Câmera de lado (perfil): nossos movimentos são no plano lateral, então de
+    // perfil o exercício lê muito melhor do que de frente.
+    camera.position.set(4.4, 1.3, 0.6)
     camera.lookAt(0, 1.05, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -117,7 +116,6 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           if (o.isBone) bones[norm(o.name)] = o
         })
         scene.add(modelo)
-        modelo.rotation.y = VISTA_LATERAL_GRAUS * DEG
         if (b('Hips')) hipsBaseY = b('Hips').position.y
       },
       undefined,
@@ -168,6 +166,15 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       const lean = SINAL_TORSO * p.torso * ESCALA_TRONCO * DEG
       if (b('Spine')) b('Spine').rotation.x = lean
       if (b('Spine1')) b('Spine1').rotation.x = lean * 0.7
+
+      // Giro de tronco: nossa animação não tem ângulo de rotação (ela sugere o
+      // giro via hipX 94..106); convertemos isso em rotação real da coluna (Y).
+      if (nomeRef.current === 'torso-twist') {
+        const tw = (p.hipX - 100) * TWIST_TRONCO_GRAUS * DEG
+        if (b('Spine')) b('Spine').rotation.y = tw * 0.45
+        if (b('Spine1')) b('Spine1').rotation.y = tw * 0.75
+        if (b('Spine2')) b('Spine2').rotation.y = tw
+      }
 
       // Pescoço: nossa animação "soltar o pescoço" não tem ângulo de pescoço —
       // ela inclina o corpo via hipX (96..104). Usamos isso para a cabeça pender.
