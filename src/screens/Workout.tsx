@@ -1,13 +1,17 @@
 // Tela de treino: cronômetro regressivo, avatar demonstrando, frases de incentivo.
 
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import Avatar from '../avatar/Avatar'
+import ErroBoundary from '../avatar/ErroBoundary'
 import { fraseAleatoria } from '../data/phrases'
 import { bipeContagem, bipeTroca, falar, silenciarVoz, somVitoria } from '../lib/audio'
 import type { Treino } from '../lib/generator'
 import { iniciarMusica, pararMusica, type EstiloMusica } from '../lib/music'
 import * as spotifyPlayer from '../lib/spotifyPlayer'
-import type { Ajustes, Perfil } from '../lib/storage'
+import { lerAvatar3D, type Ajustes, type Perfil } from '../lib/storage'
+
+// three.js só é baixado quando o avatar 3D está ligado (carregamento sob demanda)
+const Avatar3D = lazy(() => import('../avatar/Avatar3D'))
 
 interface Props {
   treino: Treino
@@ -36,6 +40,7 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
   const [segDescanso, setSegDescanso] = useState(ajustes.segDescanso)
   const [spotifyPronto, setSpotifyPronto] = useState(false)
   const [spotifyErro, setSpotifyErro] = useState<string | null>(null)
+  const [usar3D] = useState(() => lerAvatar3D())
   const ultimoBipeRef = useRef(0)
   const falouRetaFinalRef = useRef(false)
   const falouRespiraRef = useRef(false)
@@ -286,7 +291,19 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
               {ehPausaGrande ? '🌬️ PAUSA' : ehTrocaLado ? '🔄 TROCA' : '⏭ PRÓXIMO'}
             </span>
           )}
-          <Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />
+          {usar3D ? (
+            <ErroBoundary
+              fallback={<Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />}
+            >
+              <Suspense
+                fallback={<Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />}
+              >
+                <Avatar3D anim={exibido.anim} rodando={!pausado} className="avatar-3d" />
+              </Suspense>
+            </ErroBoundary>
+          ) : (
+            <Avatar anim={exibido.anim} rodando={!pausado} className="avatar-svg" />
+          )}
         </div>
 
         <div className={`cronometro ${seg <= 3 && !pausado ? 'contagem-final' : ''}`}>

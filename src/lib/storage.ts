@@ -193,3 +193,8 @@ export const gravarLembrete = (l: Lembrete) => gravar(K_LEMBRETE, l)
 const K_MODO_TV = 'aec.modoTV'
 export const lerModoTV = (): boolean => ler<boolean>(K_MODO_TV) ?? false
 export const gravarModoTV = (v: boolean) => gravar(K_MODO_TV, v)
+
+// --- Avatar 3D (experimental) ---
+const K_AVATAR_3D = 'aec.avatar3d'
+export const lerAvatar3D = (): boolean => ler<boolean>(K_AVATAR_3D) ?? false
+export const gravarAvatar3D = (v: boolean) => gravar(K_AVATAR_3D, v)
