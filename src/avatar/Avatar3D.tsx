@@ -23,6 +23,10 @@ const SINAL_COTOVELO = -1 // dobra do cotovelo
 const SINAL_TORSO = 1 // inclinação do tronco para frente
 const BRACO_BAIXAR_GRAUS = 78 // tira o braço do T-pose e deixa ao lado do corpo
 const ESCALA_TRONCO = 0.45 // o quanto a inclinação se distribui na coluna
+// Nossos movimentos são no plano lateral (frente/trás). Visto de lado, o
+// exercício fica muito mais claro do que de frente. Giro o personagem para
+// quase-perfil (ajuste o ângulo se quiser virar mais/menos ou para o outro lado).
+const VISTA_LATERAL_GRAUS = -80
 
 interface Props {
   anim: string
@@ -113,6 +117,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           if (o.isBone) bones[norm(o.name)] = o
         })
         scene.add(modelo)
+        modelo.rotation.y = VISTA_LATERAL_GRAUS * DEG
         if (b('Hips')) hipsBaseY = b('Hips').position.y
       },
       undefined,
