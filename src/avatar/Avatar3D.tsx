@@ -87,7 +87,10 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
     const bones: Record<string, THREE.Object3D> = {}
     let hipsBaseY = 0
-    const b = (nome: string) => bones['mixamorig:' + nome]
+    // O three.js remove ":" e outros caracteres dos nomes ("mixamorig:LeftArm"
+    // vira "mixamorigLeftArm"), então normalizamos (só letras/números) para achar.
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const b = (nome: string) => bones[norm('mixamorig' + nome)]
 
     const loader = new GLTFLoader()
     loader.load(
@@ -105,7 +108,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
               o.material.color = new THREE.Color(0xff9d57)
             }
           }
-          if (o.isBone) bones[o.name] = o
+          if (o.isBone) bones[norm(o.name)] = o
         })
         scene.add(modelo)
         if (b('Hips')) hipsBaseY = b('Hips').position.y
