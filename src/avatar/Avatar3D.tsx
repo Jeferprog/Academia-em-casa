@@ -23,6 +23,8 @@ const SINAL_TORSO = 1 // inclinação do tronco para frente
 const ESCALA_TRONCO = 0.45 // o quanto a inclinação se distribui na coluna
 const TWIST_TRONCO_GRAUS = 5 // intensidade do giro de tronco (eixo vertical)
 const CALCANHAR_GRAUS = 42 // flexão do tornozelo ao subir na ponta dos pés
+const ABDUZIR_GRAUS = 12 // afasta o braço do corpo p/ a mão não atravessar a coxa
+const PUNHO_GRAUS = 78 // curvatura dos dedos ao fechar a mão (boxe)
 
 interface Props {
   anim: string
@@ -110,6 +112,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     const bones: Record<string, THREE.Object3D> = {}
     let hipsBaseY = 0
     let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
+    let punhoLigado = false // mãos fechadas (boxe) ligadas no momento
     // O three.js remove ":" e outros caracteres dos nomes ("mixamorig:LeftArm"
     // vira "mixamorigLeftArm"), então normalizamos (só letras/números) para achar.
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -159,33 +162,74 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     // quaternion deixa a ordem das rotações sem ambiguidade. Valores conferidos
     // medindo a posição da mão no próprio GLB (eixos de repouso = eixos do mundo).
     const EIXO_X = new THREE.Vector3(1, 0, 0)
+    const EIXO_Y = new THREE.Vector3(0, 1, 0)
     const EIXO_Z = new THREE.Vector3(0, 0, 1)
-    const qLowerL = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, -90 * DEG)
-    const qLowerR = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, 90 * DEG)
+    // "Baixar do T" com uma pequena ABDUÇÃO (não chega a 90°), para o braço
+    // descansar afastado do corpo e a mão não atravessar a coxa.
+    const qLowerL = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, -(90 - ABDUZIR_GRAUS) * DEG)
+    const qLowerR = new THREE.Quaternion().setFromAxisAngle(EIXO_Z, (90 - ABDUZIR_GRAUS) * DEG)
     const _qSwing = new THREE.Quaternion()
     const _qWorld = new THREE.Quaternion()
     const _qParent = new THREE.Quaternion()
+    const _qExtra = new THREE.Quaternion()
 
-    function aplicarBraco(lado: 'Left' | 'Right', upper: number, fore: number) {
+    // Orientação-MUNDO desejada do braço/antebraço (deixa em _qWorld).
+    function orientacaoBraco(lado: 'Left' | 'Right', ang: number, frontal: boolean) {
+      if (frontal) {
+        // Elevação lateral: o braço sobe no plano FRONTAL (em torno de Z), para o
+        // lado, em vez de para a frente. ang<0 já indica o lado direito.
+        const base = lado === 'Left' ? -90 : 90
+        _qWorld.setFromAxisAngle(EIXO_Z, (base + ang) * DEG)
+      } else {
+        _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * ang * DEG)
+        _qWorld.copy(_qSwing).multiply(lado === 'Left' ? qLowerL : qLowerR)
+      }
+    }
+
+    function aplicarBraco(
+      lado: 'Left' | 'Right',
+      upper: number,
+      fore: number,
+      frontal = false,
+      extraY = 0,
+    ) {
       const braco = b(lado + 'Arm')
       const ante = b(lado + 'ForeArm')
       if (!braco || !braco.parent) return
-      const qLower = lado === 'Left' ? qLowerL : qLowerR
       // O ângulo do braço é ABSOLUTO em relação à vertical (mesma convenção do
-      // avatar SVG): NÃO herda a inclinação do tronco. Por isso montamos a
-      // orientação-mundo desejada (baixar do T + balançar) e descontamos o mundo
-      // do pai (ombro/coluna) para virar rotação local. Sem isso, exercícios de
-      // chão (ponte, prancha) saíam com os braços para o lado errado.
-      _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * upper * DEG)
-      _qWorld.copy(_qSwing).multiply(qLower)
+      // avatar SVG): NÃO herda a inclinação do tronco. Montamos a orientação-mundo
+      // desejada e descontamos o mundo do pai para virar rotação local. (extraY é
+      // um giro extra em torno da vertical, usado no giro de tronco p/ os braços
+      // acompanharem o corpo em vez de ficarem soltos.)
+      if (extraY) _qExtra.setFromAxisAngle(EIXO_Y, extraY * DEG)
+      orientacaoBraco(lado, upper, frontal)
+      if (extraY) _qWorld.premultiply(_qExtra)
       braco.parent.getWorldQuaternion(_qParent)
       braco.quaternion.copy(_qParent).invert().multiply(_qWorld)
       if (ante) {
         // antebraço (cotovelo): mesma ideia com o ângulo "fore".
-        _qSwing.setFromAxisAngle(EIXO_X, SINAL_BRACO_FRENTE * fore * DEG)
-        _qWorld.copy(_qSwing).multiply(qLower)
+        orientacaoBraco(lado, fore, frontal)
+        if (extraY) _qWorld.premultiply(_qExtra)
         braco.getWorldQuaternion(_qParent)
         ante.quaternion.copy(_qParent.invert()).multiply(_qWorld)
+      }
+    }
+
+    // Fecha/abre as mãos (boxe). Os dedos apontam para +X (esq) / -X (dir) e
+    // curvam para a palma girando em torno do Z local — sinal medido no GLB:
+    // esquerda negativa, direita positiva. Curvamos as 3 falanges de cada dedo.
+    const DEDOS = ['Index', 'Middle', 'Ring', 'Pinky']
+    function maos(curva: number) {
+      for (const lado of ['Left', 'Right'] as const) {
+        const s = lado === 'Left' ? -1 : 1
+        for (const dedo of DEDOS) {
+          const f1 = b(lado + 'Hand' + dedo + '1')
+          const f2 = b(lado + 'Hand' + dedo + '2')
+          const f3 = b(lado + 'Hand' + dedo + '3')
+          if (f1) f1.rotation.set(0, 0, s * curva * 0.95 * DEG)
+          if (f2) f2.rotation.set(0, 0, s * curva * DEG)
+          if (f3) f3.rotation.set(0, 0, s * curva * 0.85 * DEG)
+        }
       }
     }
 
@@ -233,8 +277,20 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         if (b('Head')) b('Head').rotation.z = tilt * 0.7
       }
 
-      aplicarBraco('Left', p.lUpper, p.lFore)
-      aplicarBraco('Right', p.rUpper, p.rFore)
+      // Elevação lateral: braços sobem para os LADOS (plano frontal). Giro de
+      // tronco: braços acompanham a rotação do corpo (extraY) em vez de soltos.
+      const frontal = nomeRef.current === 'lateral-raise'
+      const extraY = nomeRef.current === 'torso-twist' ? (p.hipX - 100) * TWIST_TRONCO_GRAUS : 0
+      aplicarBraco('Left', p.lUpper, p.lFore, frontal, extraY)
+      aplicarBraco('Right', p.rUpper, p.rFore, frontal, extraY)
+
+      // Boxe: mão fechada (punho). Liga/desliga só na troca de exercício.
+      const ehPunch = nomeRef.current === 'punch'
+      if (ehPunch !== punhoLigado) {
+        maos(ehPunch ? PUNHO_GRAUS : 0)
+        punhoLigado = ehPunch
+      }
+
       aplicarPerna('Left', p.lThigh, p.lShin)
       aplicarPerna('Right', p.rThigh, p.rShin)
 
