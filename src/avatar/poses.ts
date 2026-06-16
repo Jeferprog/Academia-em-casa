@@ -142,12 +142,12 @@ export const ANIMACOES: Record<string, AnimDef> = {
     frames: [
       p({
         hipY: 188, torso: -82,
-        lUpper: 95, lFore: 95, rUpper: 90, rFore: 90,
+        lUpper: 295, lFore: 295, rUpper: 290, rFore: 290,
         lThigh: 116, lShin: 26, rThigh: 112, rShin: 22,
       }),
       p({
         hipY: 170, torso: -72,
-        lUpper: 100, lFore: 100, rUpper: 95, rFore: 95,
+        lUpper: 298, lFore: 298, rUpper: 293, rFore: 293,
         lThigh: 104, lShin: 20, rThigh: 100, rShin: 16,
       }),
     ],
@@ -186,12 +186,12 @@ export const ANIMACOES: Record<string, AnimDef> = {
     frames: [
       p({
         hipY: 168, torso: 78,
-        lUpper: 6, lFore: 6, rUpper: -2, rFore: -2,
+        lUpper: 80, lFore: 80, rUpper: 76, rFore: 76,
         lThigh: -76, lShin: -76, rThigh: -80, rShin: -80,
       }),
       p({
         hipY: 171, torso: 79,
-        lUpper: 6, lFore: 6, rUpper: -2, rFore: -2,
+        lUpper: 80, lFore: 80, rUpper: 76, rFore: 76,
         lThigh: -77, lShin: -77, rThigh: -81, rShin: -81,
       }),
     ],
