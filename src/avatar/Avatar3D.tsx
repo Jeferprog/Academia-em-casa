@@ -246,22 +246,28 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       const braco = b(lado + 'Arm')
       const ante = b(lado + 'ForeArm')
       if (!braco || !braco.parent) return
+      const rwBraco = restW.get(braco)
+      const rwAnte = ante && restW.get(ante)
       // O ângulo do braço é ABSOLUTO em relação à vertical (mesma convenção do
-      // avatar SVG): NÃO herda a inclinação do tronco. Montamos a orientação-mundo
-      // desejada e descontamos o mundo do pai para virar rotação local. (extraY é
-      // um giro extra em torno da vertical, usado no giro de tronco p/ os braços
-      // acompanharem o corpo em vez de ficarem soltos.)
+      // avatar SVG): NÃO herda a inclinação do tronco. orientacaoBraco() dá a
+      // rotação DESEJADA partindo do repouso (T-pose); aplicamos esse delta SOBRE
+      // a orientação-mundo de repouso do osso (·rwBraco) — assim funciona em
+      // qualquer rig, igual ao girar() das pernas/coluna. Sem isso, no Avaturn
+      // (eixos ao longo do osso) o braço ficava preso na linha do ombro. (extraY
+      // é um giro extra em torno da vertical p/ os braços acompanharem o tronco.)
       if (extraY) _qExtra.setFromAxisAngle(EIXO_Y, extraY * DEG)
       orientacaoBraco(lado, upper, frontal)
       if (extraY) _qWorld.premultiply(_qExtra)
       braco.parent.getWorldQuaternion(_qParent)
       braco.quaternion.copy(_qParent).invert().multiply(_qWorld)
+      if (rwBraco) braco.quaternion.multiply(rwBraco)
       if (ante) {
         // antebraço (cotovelo): mesma ideia com o ângulo "fore".
         orientacaoBraco(lado, fore, frontal)
         if (extraY) _qWorld.premultiply(_qExtra)
         braco.getWorldQuaternion(_qParent)
-        ante.quaternion.copy(_qParent.invert()).multiply(_qWorld)
+        ante.quaternion.copy(_qParent).invert().multiply(_qWorld)
+        if (rwAnte) ante.quaternion.multiply(rwAnte)
       }
     }
 
