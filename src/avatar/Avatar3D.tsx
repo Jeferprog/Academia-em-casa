@@ -124,17 +124,21 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     const b = (nome: string) => bones[norm('mixamorig' + nome)] ?? bones[norm(nome)]
 
     const loader = new GLTFLoader()
+    console.log('🎬 Avatar3D: iniciando carregamento de', avatarUrl)
     loader.load(
       avatarUrl,
       (gltf) => {
-        if (disposto) return
+        console.log('✅ Avatar3D: GLB carregado com sucesso')
+        if (disposto) {
+          console.log('⚠️ Avatar3D: componente já foi desmontado, ignorando')
+          return
+        }
         const modelo = gltf.scene
+        let boneCount = 0
         modelo.traverse((o: any) => {
           if (o.isMesh) {
             o.castShadow = true
             o.frustumCulled = false
-            // Tom alaranjado só no manequim estilizado (sem textura). Avatares
-            // realistas (Avaturn) têm textura própria de rosto/roupa — preservamos.
             if (o.material && !o.material.map) {
               o.material = o.material.clone()
               o.material.color = new THREE.Color(0xff9d57)
@@ -143,8 +147,10 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           if (o.isBone) {
             bones[norm(o.name)] = o
             restL.set(o, o.quaternion.clone())
+            boneCount++
           }
         })
+        console.log(`📦 Avatar3D: encontrados ${boneCount} ossos. Hips presente: ${!!b('Hips')}`)
         scene.add(modelo)
         modelo.updateMatrixWorld(true)
         modelo.traverse((o: any) => {
@@ -155,11 +161,21 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           const ws = new THREE.Vector3()
           b('Hips').getWorldScale(ws)
           escalaModelo = ws.y || 1
+          console.log(`📐 Avatar3D: Hips encontrado. hipsBaseY=${hipsBaseY}, escala=${escalaModelo}`)
+        } else {
+          console.error('❌ Avatar3D: Hips não encontrado! Nomes dos ossos:', Object.keys(bones).slice(0, 10))
         }
-        configurarMaos()
+        try {
+          configurarMaos()
+          console.log('🤚 Avatar3D: mãos configuradas com sucesso')
+        } catch (e) {
+          console.error('❌ Avatar3D: erro ao configurar mãos:', e)
+        }
       },
-      undefined,
-      (err) => console.error('Falha ao carregar avatar 3D:', err),
+      (progress) => {
+        console.log(`📥 Avatar3D carregando: ${Math.round((progress.loaded / progress.total) * 100)}%`)
+      },
+      (err) => console.error('❌ Avatar3D: falha ao carregar:', err),
     )
 
     // Gira um osso por `delta` em torno de EIXOS DO MUNDO, partindo do repouso,
@@ -366,6 +382,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     // Tempo/posição na nossa sequência de poses (mesma lógica do avatar SVG)
     let t = 0
     const relogio = new THREE.Clock()
+    let loopStarted = false
     function poseAtual(): Pose {
       const d = animRef.current
       const total = d.dur.reduce((s, v) => s + v, 0) || 1
@@ -381,10 +398,18 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     }
 
     function loop() {
+      if (!loopStarted) {
+        console.log('🔄 Avatar3D: loop de animação iniciado')
+        loopStarted = true
+      }
       raf = requestAnimationFrame(loop)
       const dt = relogio.getDelta() * 1000
       if (rodandoRef.current) t += dt
-      aplicar(poseAtual())
+      try {
+        aplicar(poseAtual())
+      } catch (e) {
+        console.error('❌ Avatar3D: erro ao aplicar pose:', e)
+      }
       cadeira.visible = animRef.current.prop === 'cadeira'
       renderer.render(scene, camera)
     }
