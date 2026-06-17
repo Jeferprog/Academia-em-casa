@@ -110,13 +110,18 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     scene.add(cadeira)
 
     const bones: Record<string, THREE.Object3D> = {}
+    // Orientação de repouso de cada osso (mundo e local), capturada no load. É o
+    // que torna a animação INDEPENDENTE de como o rig foi montado (ver girar()).
+    const restW = new Map<THREE.Object3D, THREE.Quaternion>()
+    const restL = new Map<THREE.Object3D, THREE.Quaternion>()
     let hipsBaseY = 0
     let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
     let punhoLigado = false // mãos fechadas (boxe) ligadas no momento
     // O three.js remove ":" e outros caracteres dos nomes ("mixamorig:LeftArm"
     // vira "mixamorigLeftArm"), então normalizamos (só letras/números) para achar.
+    // Aceitamos nomes COM e SEM o prefixo "mixamorig" (Avaturn usa "Hips", "LeftArm"…).
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
-    const b = (nome: string) => bones[norm('mixamorig' + nome)]
+    const b = (nome: string) => bones[norm('mixamorig' + nome)] ?? bones[norm(nome)]
 
     const loader = new GLTFLoader()
     loader.load(
@@ -128,32 +133,51 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           if (o.isMesh) {
             o.castShadow = true
             o.frustumCulled = false
-            // Tom energético alaranjado no manequim
-            if (o.material) {
+            // Tom alaranjado só no manequim estilizado (sem textura). Avatares
+            // realistas (Avaturn) têm textura própria de rosto/roupa — preservamos.
+            if (o.material && !o.material.map) {
               o.material = o.material.clone()
               o.material.color = new THREE.Color(0xff9d57)
             }
           }
-          if (o.isBone) bones[norm(o.name)] = o
+          if (o.isBone) {
+            bones[norm(o.name)] = o
+            restL.set(o, o.quaternion.clone())
+          }
         })
         scene.add(modelo)
         modelo.updateMatrixWorld(true)
+        modelo.traverse((o: any) => {
+          if (o.isBone) restW.set(o, o.getWorldQuaternion(new THREE.Quaternion()))
+        })
         if (b('Hips')) {
           hipsBaseY = b('Hips').position.y
           const ws = new THREE.Vector3()
           b('Hips').getWorldScale(ws)
           escalaModelo = ws.y || 1
         }
+        configurarMaos()
       },
       undefined,
       (err) => console.error('Falha ao carregar avatar 3D:', err),
     )
 
-    // Reseta os ossos animados para a postura neutra antes de aplicar a pose.
-    function zerar(nome: string) {
-      const o = b(nome)
-      if (o) o.rotation.set(0, 0, 0)
+    // Gira um osso por `delta` em torno de EIXOS DO MUNDO, partindo do repouso,
+    // sem depender de como o rig foi montado: local = repousoPai⁻¹ · delta · repouso.
+    // (delta = identidade volta o osso ao repouso.) Vale para o manequim atual
+    // (eixos alinhados ao mundo) e para avatares Avaturn (eixos ao longo do osso).
+    const _qD = new THREE.Quaternion()
+    const _eul = new THREE.Euler()
+    function girar(osso: THREE.Object3D | undefined, delta: THREE.Quaternion) {
+      if (!osso) return
+      const rwB = restW.get(osso)
+      if (!rwB) return
+      const rwP = osso.parent ? restW.get(osso.parent) : undefined
+      if (rwP) osso.quaternion.copy(rwP).invert().multiply(delta).multiply(rwB)
+      else osso.quaternion.copy(delta).multiply(rwB)
     }
+    // delta a partir de ângulos (rad) em torno dos eixos do mundo X, Y, Z.
+    const dXYZ = (x: number, y: number, z: number) => _qD.setFromEuler(_eul.set(x, y, z))
 
     // O manequim começa em T-pose: o braço aponta para +X (esquerdo) / -X (direito).
     // Nossa convenção de pose é 0°=para baixo, 90°=para frente, 180°=para cima.
@@ -215,35 +239,72 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       }
     }
 
-    // Fecha/abre as mãos (boxe). Os dedos apontam para +X (esq) / -X (dir) e
-    // curvam para a palma girando em torno do Z local — sinal medido no GLB:
-    // esquerda negativa, direita positiva. Curvamos as 3 falanges de cada dedo.
+    // Mãos (boxe): fecha/abre os dedos. O eixo de dobra do nó do dedo e o sentido
+    // (para a palma) são MEDIDOS no rig em configurarMaos(), então funciona em
+    // qualquer avatar. Cada osso guarda em userData o eixo local de dobra; o sinal
+    // por mão é guardado em maoSinal.
     const DEDOS = ['Index', 'Middle', 'Ring', 'Pinky']
+    const SEGS: Array<[string, number]> = [['1', 0.95], ['2', 1], ['3', 0.85]]
+    const maoSinal: Record<string, number> = { Left: -1, Right: 1 }
+    const _qCurl = new THREE.Quaternion()
+    const _v1 = new THREE.Vector3()
+    const _v2 = new THREE.Vector3()
+
+    function configurarMaos() {
+      for (const lado of ['Left', 'Right'] as const) {
+        const idx = b(lado + 'HandIndex1')
+        const pinky = b(lado + 'HandPinky1')
+        const hand = b(lado + 'Hand')
+        if (!idx || !pinky || !hand) continue
+        // eixo do "nó dos dedos" no mundo = largura da mão (indicador → mindinho)
+        idx.getWorldPosition(_v1)
+        pinky.getWorldPosition(_v2)
+        const larguraMundo = _v2.clone().sub(_v1).normalize()
+        // guarda o eixo de dobra no espaço LOCAL de cada falange
+        for (const dedo of DEDOS) {
+          for (const [seg] of SEGS) {
+            const o = b(lado + 'Hand' + dedo + seg)
+            const rw = o && restW.get(o)
+            if (o && rw) o.userData.curl = larguraMundo.clone().applyQuaternion(rw.clone().invert()).normalize()
+          }
+        }
+        // sinal: curvar deve aproximar a ponta do dedo da mão (fechar p/ a palma)
+        const teste = b(lado + 'HandMiddle1')
+        const ponta = b(lado + 'HandMiddle3') ?? b(lado + 'HandMiddle2')
+        const eixo = teste?.userData.curl
+        if (teste && ponta && eixo && restL.get(teste)) {
+          hand.getWorldPosition(_v1)
+          ponta.getWorldPosition(_v2)
+          const antes = _v2.distanceTo(_v1)
+          teste.quaternion.copy(restL.get(teste)!).multiply(_qCurl.setFromAxisAngle(eixo, 0.6))
+          teste.updateWorldMatrix(false, true)
+          ponta.getWorldPosition(_v2)
+          const depois = _v2.distanceTo(_v1)
+          teste.quaternion.copy(restL.get(teste)!)
+          teste.updateWorldMatrix(false, true)
+          maoSinal[lado] = depois < antes ? 1 : -1
+        }
+      }
+    }
+
     function maos(curva: number) {
       for (const lado of ['Left', 'Right'] as const) {
-        const s = lado === 'Left' ? -1 : 1
+        const s = maoSinal[lado]
         for (const dedo of DEDOS) {
-          const f1 = b(lado + 'Hand' + dedo + '1')
-          const f2 = b(lado + 'Hand' + dedo + '2')
-          const f3 = b(lado + 'Hand' + dedo + '3')
-          if (f1) f1.rotation.set(0, 0, s * curva * 0.95 * DEG)
-          if (f2) f2.rotation.set(0, 0, s * curva * DEG)
-          if (f3) f3.rotation.set(0, 0, s * curva * 0.85 * DEG)
+          for (const [seg, fator] of SEGS) {
+            const o = b(lado + 'Hand' + dedo + seg)
+            const eixo = o?.userData.curl as THREE.Vector3 | undefined
+            const rl = o && restL.get(o)
+            if (o && eixo && rl) o.quaternion.copy(rl).multiply(_qCurl.setFromAxisAngle(eixo, s * curva * fator * DEG))
+          }
         }
       }
     }
 
     function aplicarPerna(lado: 'Left' | 'Right', thigh: number, shin: number) {
-      const coxa = b(lado + 'UpLeg')
-      const canela = b(lado + 'Leg')
-      if (coxa) {
-        coxa.rotation.set(0, 0, 0)
-        coxa.rotation.x = SINAL_PERNA_FRENTE * thigh * DEG
-      }
-      if (canela) {
-        canela.rotation.set(0, 0, 0)
-        canela.rotation.x = SINAL_JOELHO * (shin - thigh) * DEG
-      }
+      // coxa balança em torno do eixo X do mundo; o joelho dobra no mesmo eixo.
+      girar(b(lado + 'UpLeg'), dXYZ(SINAL_PERNA_FRENTE * thigh * DEG, 0, 0))
+      girar(b(lado + 'Leg'), dXYZ(SINAL_JOELHO * (shin - thigh) * DEG, 0, 0))
     }
 
     function aplicar(p: Pose) {
@@ -251,31 +312,20 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       // Sobe/desce leve do quadril (nossa hipY ~120 = em pé; maior = mais baixo)
       b('Hips').position.y = hipsBaseY + (120 - p.hipY) * 0.006
 
-      zerar('Spine')
-      zerar('Spine1')
-      zerar('Spine2')
+      // Coluna: inclinação (eixo X) distribuída em Spine/Spine1 e, no giro de
+      // tronco, rotação real em torno da vertical (Y) crescendo até o Spine2.
+      // dXYZ usa eixos do MUNDO, então funciona em qualquer rig.
       const lean = SINAL_TORSO * p.torso * ESCALA_TRONCO * DEG
-      if (b('Spine')) b('Spine').rotation.x = lean
-      if (b('Spine1')) b('Spine1').rotation.x = lean * 0.7
-
-      // Giro de tronco: nossa animação não tem ângulo de rotação (ela sugere o
-      // giro via hipX 94..106); convertemos isso em rotação real da coluna (Y).
-      if (nomeRef.current === 'torso-twist') {
-        const tw = (p.hipX - 100) * TWIST_TRONCO_GRAUS * DEG
-        if (b('Spine')) b('Spine').rotation.y = tw * 0.45
-        if (b('Spine1')) b('Spine1').rotation.y = tw * 0.75
-        if (b('Spine2')) b('Spine2').rotation.y = tw
-      }
+      const tw = nomeRef.current === 'torso-twist' ? (p.hipX - 100) * TWIST_TRONCO_GRAUS * DEG : 0
+      girar(b('Spine'), dXYZ(lean, tw * 0.45, 0))
+      girar(b('Spine1'), dXYZ(lean * 0.7, tw * 0.75, 0))
+      girar(b('Spine2'), dXYZ(0, tw, 0))
 
       // Pescoço: nossa animação "soltar o pescoço" não tem ângulo de pescoço —
       // ela inclina o corpo via hipX (96..104). Usamos isso para a cabeça pender.
-      zerar('Neck')
-      zerar('Head')
-      if (nomeRef.current === 'neck-stretch') {
-        const tilt = (p.hipX - 100) * 7 * DEG
-        if (b('Neck')) b('Neck').rotation.z = tilt * 0.5
-        if (b('Head')) b('Head').rotation.z = tilt * 0.7
-      }
+      const tilt = nomeRef.current === 'neck-stretch' ? (p.hipX - 100) * 7 * DEG : 0
+      girar(b('Neck'), dXYZ(0, 0, tilt * 0.5))
+      girar(b('Head'), dXYZ(0, 0, tilt * 0.7))
 
       // Elevação lateral: braços sobem para os LADOS (plano frontal). Giro de
       // tronco: braços acompanham a rotação do corpo (extraY) em vez de soltos.
@@ -294,24 +344,20 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       aplicarPerna('Left', p.lThigh, p.lShin)
       aplicarPerna('Right', p.rThigh, p.rShin)
 
-      // Pés: em repouso ficam planos. Só o "balanço de calcanhares" os usa, então
-      // zeramos sempre (para não travarem flexionados ao trocar de exercício).
-      zerar('LeftFoot'); zerar('RightFoot')
-      zerar('LeftToeBase'); zerar('RightToeBase')
-      if (nomeRef.current === 'calf-raise') {
-        // Subir na ponta dos pés: o tornozelo flexiona (calcanhar sobe) enquanto
-        // a ponta do pé fica colada no chão. Para isso giramos o pé no tornozelo,
-        // contra-giramos os dedos (ficam planos) e subimos o quadril o tanto que
-        // a "bola" do pé desceria — assim a ponta não atravessa o chão. Os números
-        // (0.087/0.107) são o vetor tornozelo→bola medido no próprio GLB.
-        const lift = Math.min(1, Math.max(0, (120 - p.hipY) / 7))
-        const th = lift * CALCANHAR_GRAUS * DEG
-        for (const lado of ['Left', 'Right'] as const) {
-          const pe = b(lado + 'Foot')
-          const dedo = b(lado + 'ToeBase')
-          if (pe) pe.rotation.x = th
-          if (dedo) dedo.rotation.x = -th
-        }
+      // Pés: em repouso ficam planos. Só o "balanço de calcanhares" os usa.
+      // Subir na ponta dos pés: o tornozelo flexiona (calcanhar sobe) enquanto a
+      // ponta do pé fica colada no chão — giramos o pé, contra-giramos os dedos e
+      // subimos o quadril o tanto que a "bola" do pé desceria. Os números
+      // (0.087/0.107) são o vetor tornozelo→bola medido no manequim atual.
+      const th =
+        nomeRef.current === 'calf-raise'
+          ? Math.min(1, Math.max(0, (120 - p.hipY) / 7)) * CALCANHAR_GRAUS * DEG
+          : 0
+      for (const lado of ['Left', 'Right'] as const) {
+        girar(b(lado + 'Foot'), dXYZ(th, 0, 0))
+        girar(b(lado + 'ToeBase'), dXYZ(-th, 0, 0))
+      }
+      if (th) {
         const ballDrop = 0.087 * (Math.cos(th) - 1) + 0.107 * Math.sin(th)
         b('Hips').position.y = hipsBaseY + ballDrop / escalaModelo
       }
