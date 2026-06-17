@@ -41,6 +41,7 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
   const [spotifyPronto, setSpotifyPronto] = useState(false)
   const [spotifyErro, setSpotifyErro] = useState<string | null>(null)
   const [usar3D] = useState(() => lerAvatar3D())
+  const [infoAberta, setInfoAberta] = useState(false)
   const ultimoBipeRef = useRef(0)
   const falouRetaFinalRef = useRef(false)
   const falouRespiraRef = useRef(false)
@@ -324,7 +325,7 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
         </div>
       </main>
 
-      <section className="treino-info">
+      <section className="treino-info" onClick={() => ehExercicio && setInfoAberta(true)}>
         {ehExercicio ? (
           <>
             {revezando && (
@@ -335,7 +336,7 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
             {etapa.lado && (
               <p className="lado-badge">🦵 Lado <strong>{etapa.lado}</strong></p>
             )}
-            <h2>{etapa.exercicio.nome}</h2>
+            <h2 className="titulo-exercicio">{etapa.exercicio.nome}</h2>
             <p className="dica">{etapa.exercicio.dica}</p>
             <p className="variacao">
               {modoFacil ? '💚 Versão mais leve: ' : '👉 '}
@@ -363,6 +364,23 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
           </>
         )}
       </section>
+
+      {infoAberta && (
+        <div className="modal-overlay" onClick={() => setInfoAberta(false)}>
+          <div className="modal-info" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-fechar" onClick={() => setInfoAberta(false)}>✕</button>
+            <h2>{etapa.exercicio.nome}</h2>
+            {etapa.lado && <p className="lado-badge">🦵 Lado <strong>{etapa.lado}</strong></p>}
+            <div className="modal-conteudo">
+              <p className="dica">{etapa.exercicio.dica}</p>
+              <p className="variacao">
+                {modoFacil ? '💚 Versão mais leve: ' : '👉 '}
+                {variacao}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {proximos.length > 0 && (
         <section className="proximos">
