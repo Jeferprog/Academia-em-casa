@@ -48,7 +48,11 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
   useEffect(() => {
     const mount = mountRef.current
-    if (!mount) return
+    if (!mount) {
+      console.error('❌ Avatar3D: mount ref não encontrado')
+      return
+    }
+    console.log(`🎨 Avatar3D: mount encontrado, dimensões ${mount.clientWidth}x${mount.clientHeight}`)
     let raf = 0
     let disposto = false
 
@@ -68,6 +72,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     mount.appendChild(renderer.domElement)
+    console.log(`🎬 Avatar3D: renderer criado (${larg()}x${alt()}), adicionado ao DOM`)
 
     // Luzes: ambiente azulado + luz quente principal (estilo "cockpit") + recorte ciano
     scene.add(new THREE.HemisphereLight(0xaecbff, 0x202840, 1.15))
@@ -117,6 +122,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     let hipsBaseY = 0
     let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
     let punhoLigado = false // mãos fechadas (boxe) ligadas no momento
+    let bonesLoaded = false // flag para saber se GLB foi carregado com sucesso
     // O three.js remove ":" e outros caracteres dos nomes ("mixamorig:LeftArm"
     // vira "mixamorigLeftArm"), então normalizamos (só letras/números) para achar.
     // Aceitamos nomes COM e SEM o prefixo "mixamorig" (Avaturn usa "Hips", "LeftArm"…).
@@ -164,13 +170,17 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
           console.log(`📐 Avatar3D: Hips encontrado. hipsBaseY=${hipsBaseY}, escala=${escalaModelo}`)
         } else {
           console.error('❌ Avatar3D: Hips não encontrado! Nomes dos ossos:', Object.keys(bones).slice(0, 10))
+          return
         }
         try {
           configurarMaos()
           console.log('🤚 Avatar3D: mãos configuradas com sucesso')
         } catch (e) {
           console.error('❌ Avatar3D: erro ao configurar mãos:', e)
+          return
         }
+        bonesLoaded = true
+        console.log('✨ Avatar3D: pronto para animar')
       },
       (progress) => {
         console.log(`📥 Avatar3D carregando: ${Math.round((progress.loaded / progress.total) * 100)}%`)
@@ -398,19 +408,21 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     }
 
     function loop() {
-      if (!loopStarted) {
+      if (!loopStarted && bonesLoaded) {
         console.log('🔄 Avatar3D: loop de animação iniciado')
         loopStarted = true
       }
       raf = requestAnimationFrame(loop)
       const dt = relogio.getDelta() * 1000
       if (rodandoRef.current) t += dt
-      try {
-        aplicar(poseAtual())
-      } catch (e) {
-        console.error('❌ Avatar3D: erro ao aplicar pose:', e)
+      if (bonesLoaded) {
+        try {
+          aplicar(poseAtual())
+        } catch (e) {
+          console.error('❌ Avatar3D: erro ao aplicar pose:', e)
+        }
+        cadeira.visible = animRef.current.prop === 'cadeira'
       }
-      cadeira.visible = animRef.current.prop === 'cadeira'
       renderer.render(scene, camera)
     }
     loop()
