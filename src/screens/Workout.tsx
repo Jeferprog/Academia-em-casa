@@ -323,6 +323,28 @@ export default function Workout({ treino, ajustes, perfil, modoTV, aoTerminar }:
             {seg}
           </div>
         </div>
+
+        {/* Botões duplicados aqui para landscape (coluna ao lado do cronômetro) */}
+        <div className="controles-landscape">
+          <button className="btn-controle" onClick={() => setPausado((v) => !v)}>
+            {pausado ? '▶' : '⏸'}
+          </button>
+          {ehExercicio && !modoFacil && (
+            <button className="btn-controle btn-dificil" onClick={() => setModoFacil(true)}>
+              😅
+            </button>
+          )}
+          {!ehExercicio && (
+            <div className="ajuste-descanso">
+              <button onClick={() => ajustarDescanso(-5)} aria-label="Menos descanso">−</button>
+              <span>{segDescanso}s</span>
+              <button onClick={() => ajustarDescanso(5)} aria-label="Mais descanso">+</button>
+            </div>
+          )}
+          <button className="btn-controle" onClick={() => avancar(true)}>
+            ⏭
+          </button>
+        </div>
       </main>
 
       <section className="treino-info" onClick={() => ehExercicio && setInfoAberta(true)}>

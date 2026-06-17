@@ -673,34 +673,92 @@ button {
    coluna não cabe, então encolhemos a vertical: avatar e cronômetro lado a
    lado dimensionados pela altura (vh), textos menores e escondemos a lista
    "A seguir" para sobrar espaço aos controles. */
+/* Botões duplicados para landscape (escondidos em portrait) */
+.controles-landscape { display: none; }
+
 @media (orientation: landscape) and (max-height: 600px) {
-  .treino { padding: 6px 12px 6px; gap: 3px; }
-  .treino-topo { gap: 6px; font-size: 0.75rem; }
+  /* Layout: coluna principal com 3 seções empilhadas:
+     topo, linha-principal (avatar+timer+botões), info  */
+  .treino { padding: 4px 10px 4px; gap: 2px; }
+  .treino-topo { gap: 6px; font-size: 0.75rem; padding-bottom: 2px; }
   .treino-bloco { padding: 3px 8px; font-size: 0.7rem; }
   .treino-contagem { font-size: 0.75rem; }
-  .btn-fechar { font-size: 1.1rem; padding: 4px 6px; }
+  .btn-fechar { font-size: 1rem; padding: 3px 5px; }
   .barra-progresso { height: 3px; }
-  .treino-centro { gap: 12px; }
-  .avatar-caixa { max-width: 46vh; padding: 4px; }
+
+  /* Linha principal: avatar | cronômetro | botões-em-coluna */
+  .treino-centro {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+  }
+  .avatar-caixa {
+    flex: 1;
+    max-width: none;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
   .avatar-3d,
-  .treino.modo-tv .avatar-3d { height: 44vh; }
-  .cronometro { flex: 0 0 auto; width: 28vh; }
-  .cronometro-num { font-size: 2rem; }
-  .treino-info { min-height: 0; padding: 0; margin: 0; }
-  .treino-info h2 { font-size: 1.1rem; margin: 0 0 2px; }
-  .dica,
-  .variacao { font-size: 0.8rem; margin: 0; }
-  .revezamento-vez { font-size: 0.8rem; padding: 4px 8px; margin-bottom: 2px; }
-  .lado-badge { font-size: 0.8rem; margin: 0 0 2px; }
-  .titulo-exercicio { cursor: pointer; opacity: 0.9; transition: opacity 0.2s; }
-  .titulo-exercicio:active { opacity: 1; }
-  .treino-info .dica,
+  .treino.modo-tv .avatar-3d { height: 40vh; width: 100%; }
+  .cronometro { flex: 0 0 auto; width: 22vh; align-self: center; }
+  .cronometro-num { font-size: 1.8rem; }
+
+  /* Botões em coluna (aparecem em landscape) */
+  .controles-landscape {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    width: 80px;
+  }
+  .controles-landscape .btn-controle {
+    flex: none;
+    padding: 10px 6px;
+    font-size: 1.1rem;
+  }
+  .controles-landscape .ajuste-descanso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+  }
+
+  /* Footer de controles: esconder em landscape (usamos .controles-landscape) */
+  .treino-controles { display: none; }
+
+  /* Linha de baixo: nome · dica numa linha só */
+  .treino-info {
+    min-height: 0;
+    padding: 4px 0 2px;
+    border-top: 1px solid var(--borda);
+    text-align: left;
+  }
+  .treino-info h2 {
+    font-size: 0.95rem;
+    margin: 0;
+    display: inline;
+    font-weight: 700;
+  }
+  .treino-info h2::after { content: ' · '; color: var(--texto2); font-weight: 400; }
+  .treino-info .dica {
+    display: inline;
+    font-size: 0.82rem;
+    margin: 0;
+    color: var(--texto2);
+  }
   .treino-info .variacao { display: none; }
+  .revezamento-vez { font-size: 0.75rem; padding: 2px 8px; margin: 0 4px 2px 0; display: inline-block; }
+  .lado-badge { font-size: 0.75rem; margin: 0 4px 2px 0; display: inline-block; }
+
+  /* Esconder o que não cabe */
   .proximos { display: none; }
-  .frase-incentivo { padding: 8px 10px; font-size: 1rem; }
-  .treino-controles { gap: 4px; }
-  .btn-controle { padding: 8px 6px; font-size: 0.9rem; }
-  .ajuste-descanso { font-size: 0.85rem; gap: 4px; }
+  .frase-incentivo { display: none; }
+  .spotify-area { display: none; }
 }
 
 /* --- Barra de navegação inferior (Kinetic Midnight) --- */
