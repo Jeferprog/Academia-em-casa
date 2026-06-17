@@ -674,19 +674,29 @@ button {
    lado dimensionados pela altura (vh), textos menores e escondemos a lista
    "A seguir" para sobrar espaço aos controles. */
 @media (orientation: landscape) and (max-height: 600px) {
-  .treino { padding: 8px 16px 10px; gap: 6px; }
-  .treino-centro { gap: 18px; }
-  .avatar-caixa { max-width: 46vh; }
+  .treino { padding: 6px 12px 6px; gap: 3px; }
+  .treino-topo { gap: 6px; font-size: 0.75rem; }
+  .treino-bloco { padding: 3px 8px; font-size: 0.7rem; }
+  .treino-contagem { font-size: 0.75rem; }
+  .btn-fechar { font-size: 1.1rem; padding: 4px 6px; }
+  .barra-progresso { height: 3px; }
+  .treino-centro { gap: 12px; }
+  .avatar-caixa { max-width: 46vh; padding: 4px; }
   .avatar-3d,
   .treino.modo-tv .avatar-3d { height: 44vh; }
-  .cronometro { flex: 0 0 auto; width: 30vh; max-width: 30vh; }
-  .cronometro-num { font-size: 2.4rem; }
-  .treino-info { min-height: 0; }
-  .treino-info h2 { font-size: 1.25rem; margin-bottom: 2px; }
+  .cronometro { flex: 0 0 auto; width: 28vh; }
+  .cronometro-num { font-size: 2rem; }
+  .treino-info { min-height: 0; padding: 0; margin: 0; }
+  .treino-info h2 { font-size: 1.1rem; margin: 0 0 2px; }
   .dica,
-  .variacao { font-size: 0.85rem; margin-bottom: 2px; }
+  .variacao { font-size: 0.8rem; margin: 0; }
+  .revezamento-vez { font-size: 0.8rem; padding: 4px 8px; margin-bottom: 2px; }
+  .lado-badge { font-size: 0.8rem; margin: 0 0 2px; }
   .proximos { display: none; }
-  .btn-controle { padding: 10px 8px; }
+  .frase-incentivo { padding: 8px 10px; font-size: 1rem; }
+  .treino-controles { gap: 4px; }
+  .btn-controle { padding: 8px 6px; font-size: 0.9rem; }
+  .ajuste-descanso { font-size: 0.85rem; gap: 4px; }
 }
 
 /* --- Barra de navegação inferior (Kinetic Midnight) --- */
