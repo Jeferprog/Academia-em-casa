@@ -702,7 +702,7 @@ button {
     align-items: center;
   }
   .avatar-3d,
-  .treino.modo-tv .avatar-3d { height: 46vh; width: 100%; }
+  .treino.modo-tv .avatar-3d { height: 36vh; width: 100%; }
   .cronometro { flex: 0 0 auto; width: 25vh; align-self: center; }
   .cronometro-num { font-size: 2rem; }
 
