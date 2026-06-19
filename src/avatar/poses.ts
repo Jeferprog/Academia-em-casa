@@ -397,6 +397,77 @@ export const ANIMACOES: Record<string, AnimDef> = {
     ],
     dur: [550, 550, 250, 550, 550, 250],
   },
+
+  // Rolar o pescoço: a cabeça faz um círculo lento (queixo no peito → ombro →
+  // trás → outro ombro). O corpo fica parado; no avatar 3D o "torso" vira flexão
+  // frente/trás do pescoço e o hipX vira a inclinação lateral (ver Avatar3D).
+  'neck-roll': {
+    frames: [
+      p({ torso: 16, hipX: 100 }), // queixo ao peito (frente)
+      p({ torso: 0, hipX: 107 }), //  rola para a esquerda
+      p({ torso: -10, hipX: 100 }), // cabeça para trás
+      p({ torso: 0, hipX: 93 }), //   rola para a direita
+    ],
+    dur: [800, 800, 800, 800],
+  },
+
+  // Queixo ao peito: flexiona o pescoço para frente (alonga a nuca), segura, e
+  // depois olha levemente para cima. Movimento bem lento, sem forçar.
+  'neck-tilt': {
+    frames: [
+      p({ torso: 20 }), //  queixo ao peito
+      p({ torso: 18 }), //  segura (alonga a nuca)
+      p({ torso: -10 }), // olha levemente para cima
+      p({ torso: -8 }),
+    ],
+    dur: [1100, 700, 1100, 700],
+  },
+
+  // Alongamento de ombro: leva o braço cruzado à frente do corpo, o outro braço
+  // ajuda a segurar o cotovelo. Alterna os dois lados.
+  'shoulder-cross': {
+    frames: [
+      p({ lUpper: 92, lFore: 92, rUpper: 66, rFore: 126 }), // estica ombro esquerdo
+      p({ lUpper: 95, lFore: 95, rUpper: 68, rFore: 128 }), // segura
+      p({ rUpper: 92, rFore: 92, lUpper: 66, lFore: 126 }), // estica ombro direito
+      p({ rUpper: 95, rFore: 95, lUpper: 68, lFore: 128 }), // segura
+    ],
+    dur: [1100, 700, 1100, 700],
+  },
+
+  // Alongamento de tríceps: um braço sobe e dobra o cotovelo levando a mão atrás
+  // da cabeça/nuca; a outra mão empurra de leve o cotovelo. Alterna os lados.
+  'triceps-stretch': {
+    frames: [
+      p({ lUpper: 168, lFore: 256, rUpper: 150, rFore: 168 }), // esq. atrás da cabeça
+      p({ lUpper: 170, lFore: 260, rUpper: 152, rFore: 170 }), // segura
+      p({ rUpper: 168, rFore: 256, lUpper: 150, lFore: 168 }), // troca de lado
+      p({ rUpper: 170, rFore: 260, lUpper: 152, lFore: 170 }), // segura
+    ],
+    dur: [1100, 700, 1100, 700],
+  },
+
+  // Alongamento de punho e mão: estica um braço à frente e usa a outra mão para
+  // puxar de leve os dedos para trás (alonga punho e antebraço). Alterna.
+  'wrist-stretch': {
+    frames: [
+      p({ lUpper: 90, lFore: 90, rUpper: 76, rFore: 112 }), // esq. à frente, dir. pega
+      p({ lUpper: 90, lFore: 78, rUpper: 78, rFore: 116 }), // puxa os dedos (flexiona)
+      p({ rUpper: 90, rFore: 90, lUpper: 76, lFore: 112 }), // troca de lado
+      p({ rUpper: 90, rFore: 78, lUpper: 78, lFore: 116 }),
+    ],
+    dur: [1000, 800, 1000, 800],
+  },
+
+  // Entrelaçar as mãos e empurrar à frente: arredonda a parte de cima das costas
+  // (solta a tensão entre as escápulas/ombros).
+  'clasp-forward': {
+    frames: [
+      p({ lUpper: 88, lFore: 88, rUpper: 86, rFore: 86, torso: 12, hipY: 121 }),
+      p({ lUpper: 93, lFore: 93, rUpper: 91, rFore: 91, torso: 18, hipY: 122 }),
+    ],
+    dur: [1300, 1300],
+  },
 }
 
 export const animOuPadrao = (chave: string): AnimDef => ANIMACOES[chave] ?? ANIMACOES['march']
