@@ -677,12 +677,19 @@ button {
 .controles-landscape { display: none; }
 
 @media (orientation: landscape) and (max-height: 750px) {
-  /* Altura MUITO apertada: esconder barra de progresso, header bem mínimo */
-  .treino { padding: 2px 6px 1px; gap: 0px; }
-  .treino-topo { gap: 1px; font-size: 0.6rem; padding-bottom: 0px; line-height: 1; height: 18px; overflow: hidden; }
-  .treino-bloco { padding: 1px 3px; font-size: 0.55rem; }
-  .treino-contagem { font-size: 0.6rem; }
-  .btn-fechar { font-size: 0.85rem; padding: 1px 2px; min-width: 22px; line-height: 1; }
+  /* Força a tela a não ter scroll: fixa a altura na viewport real */
+  .treino {
+    height: 100dvh;
+    min-height: unset;
+    max-height: 100dvh;
+    overflow: hidden;
+    padding: 2px 6px 1px;
+    gap: 0px;
+  }
+  .treino-topo { gap: 2px; font-size: 0.65rem; padding-bottom: 0px; line-height: 1.2; }
+  .treino-bloco { padding: 1px 4px; font-size: 0.6rem; }
+  .treino-contagem { font-size: 0.65rem; }
+  .btn-fechar { font-size: 0.9rem; padding: 1px 3px; min-width: 22px; line-height: 1; }
   .barra-progresso { display: none; }
 
   /* Linha principal: avatar | cronômetro | botões */
@@ -700,27 +707,28 @@ button {
     display: flex;
     align-items: center;
   }
+  /* Avatar: usa flex para preencher o espaço disponível, sem altura fixa */
   .avatar-3d,
-  .treino.modo-tv .avatar-3d { height: 26vh; width: 100%; }
+  .treino.modo-tv .avatar-3d { height: 100%; min-height: 80px; width: 100%; }
+  .avatar-svg { height: 100%; width: auto; max-height: 100%; }
 
-  /* Cronômetro grande */
-  .cronometro { flex: 0 0 auto; width: 30vh; align-self: center; }
-  .cronometro-num { font-size: 2.2rem; font-weight: 900; }
-  .anel { max-width: 100%; max-height: 100%; }
+  /* Cronômetro */
+  .cronometro { flex: 0 0 auto; width: 28vh; align-self: center; }
+  .cronometro-num { font-size: 2rem; font-weight: 900; }
 
-  /* Botões maiores */
+  /* Botões em coluna */
   .controles-landscape {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     flex: 0 0 auto;
-    width: 120px;
+    width: 110px;
   }
   .controles-landscape .btn-controle {
     flex: none;
     padding: 10px 4px;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     line-height: 1;
   }
   .controles-landscape .ajuste-descanso {
@@ -728,24 +736,24 @@ button {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
   }
   .controles-landscape .ajuste-descanso button { padding: 3px 1px; font-size: 0.9rem; }
 
   /* Footer: esconder */
   .treino-controles { display: none; }
 
-  /* Info super compacta */
+  /* Info compacta — nome · dica numa linha */
   .treino-info {
+    flex: 0 0 auto;
     min-height: 0;
-    padding: 1px 0 0px;
+    padding: 2px 0 1px;
     border-top: 1px solid var(--borda);
     text-align: left;
-    line-height: 1.1;
-    font-size: 0.75rem;
+    line-height: 1.2;
   }
   .treino-info h2 {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin: 0;
     display: inline;
     font-weight: 700;
@@ -753,13 +761,13 @@ button {
   .treino-info h2::after { content: ' · '; color: var(--texto2); font-weight: 400; }
   .treino-info .dica {
     display: inline;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     margin: 0;
     color: var(--texto2);
   }
   .treino-info .variacao { display: none; }
-  .revezamento-vez { font-size: 0.6rem; padding: 0px 3px; margin: 0 1px; display: none; }
-  .lado-badge { font-size: 0.6rem; margin: 0 1px; display: inline-block; }
+  .revezamento-vez { display: none; }
+  .lado-badge { font-size: 0.65rem; margin: 0 2px 0px 0; display: inline-block; }
 
   /* Esconder o que não cabe */
   .proximos { display: none; }
