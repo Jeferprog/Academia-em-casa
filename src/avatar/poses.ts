@@ -69,12 +69,15 @@ export const ANIMACOES: Record<string, AnimDef> = {
     dur: [280, 280, 280, 280, 0],
   },
 
+  // Polichinelo (visto de FRENTE): braços e pernas abrem para os lados (plano
+  // frontal). Os ângulos +/- simétricos viram abdução no avatar 3D; no 2D viram
+  // braços para cima e pernas afastadas.
   'jumping-jack': {
     frames: [
-      p({ lUpper: 10, lFore: 10, rUpper: -10, rFore: -10, lThigh: 3, lShin: 3, rThigh: -3, rShin: -3 }),
+      p({ lUpper: 8, lFore: 8, rUpper: -8, rFore: -8, lThigh: 4, lShin: 4, rThigh: -4, rShin: -4 }),
       p({
-        hipY: 126, lUpper: 170, lFore: 172, rUpper: -170, rFore: -172,
-        lThigh: 22, lShin: 22, rThigh: -22, rShin: -22,
+        hipY: 116, lUpper: 168, lFore: 168, rUpper: -168, rFore: -168,
+        lThigh: 40, lShin: 40, rThigh: -40, rShin: -40,
       }),
     ],
     dur: [320, 320],
@@ -301,12 +304,15 @@ export const ANIMACOES: Record<string, AnimDef> = {
     prop: 'degrau',
   },
 
+  // Passo lateral com braços (visto de FRENTE): o corpo desliza para os lados
+  // (hipX move o quadril no 3D / a figura no 2D) e os braços bombeiam para os
+  // lados (plano frontal). Pernas neutras — o deslocamento já passa o passo.
   'side-step': {
     frames: [
-      p({ hipX: 86, lThigh: 16, lShin: 16, rThigh: -16, rShin: -16, lUpper: 50, lFore: 55, rUpper: -50, rFore: -55 }),
-      p({ hipX: 100, lUpper: 130, lFore: 135, rUpper: -130, rFore: -135 }),
-      p({ hipX: 114, lThigh: 16, lShin: 16, rThigh: -16, rShin: -16, lUpper: 50, lFore: 55, rUpper: -50, rFore: -55 }),
-      p({ hipX: 100, lUpper: 130, lFore: 135, rUpper: -130, rFore: -135 }),
+      p({ hipX: 86, lUpper: 50, lFore: 50, rUpper: -50, rFore: -50 }),
+      p({ hipX: 100, lUpper: 128, lFore: 128, rUpper: -128, rFore: -128 }),
+      p({ hipX: 114, lUpper: 50, lFore: 50, rUpper: -50, rFore: -50 }),
+      p({ hipX: 100, lUpper: 128, lFore: 128, rUpper: -128, rFore: -128 }),
     ],
     dur: [340, 340, 340, 340],
   },
