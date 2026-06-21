@@ -61,10 +61,16 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(32, larg() / alt(), 0.1, 100)
-    // Câmera de lado (perfil): nossos movimentos são no plano lateral, então de
-    // perfil o exercício lê muito melhor do que de frente.
-    camera.position.set(4.4, 1.3, 0.6)
-    camera.lookAt(0, 1.05, 0)
+    // Câmera de lado (perfil): a maioria dos movimentos é no plano sagital, então
+    // de perfil o exercício lê melhor. Alguns movimentos são no plano FRONTAL
+    // (polichinelo, passo lateral) — para esses a câmera vai para a frente do
+    // boneco (o manequim olha para +Z). A troca é suave (lerp no loop).
+    const CAM_LADO = new THREE.Vector3(4.4, 1.3, 0.6)
+    const CAM_FRENTE = new THREE.Vector3(0.5, 1.35, 4.7)
+    const ANIMS_DE_FRENTE = new Set(['jumping-jack', 'side-step'])
+    const ALVO_CAM = new THREE.Vector3(0, 1.05, 0)
+    camera.position.copy(CAM_LADO)
+    camera.lookAt(ALVO_CAM)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -120,6 +126,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
     const restW = new Map<THREE.Object3D, THREE.Quaternion>()
     const restL = new Map<THREE.Object3D, THREE.Quaternion>()
     let hipsBaseY = 0
+    let hipsBaseX = 0 // x de repouso do quadril (p/ o passo lateral deslocar o corpo)
     let escalaModelo = 1 // o GLB vem em escala 0.01; posição de osso é em unidade local
     let punhoLigado = false // mãos fechadas (boxe) ligadas no momento
     let bonesLoaded = false // flag para saber se GLB foi carregado com sucesso
@@ -164,6 +171,7 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         })
         if (b('Hips')) {
           hipsBaseY = b('Hips').position.y
+          hipsBaseX = b('Hips').position.x
           const ws = new THREE.Vector3()
           b('Hips').getWorldScale(ws)
           escalaModelo = ws.y || 1
@@ -343,6 +351,10 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       if (!b('Hips')) return
       // Sobe/desce leve do quadril (nossa hipY ~120 = em pé; maior = mais baixo)
       b('Hips').position.y = hipsBaseY + (120 - p.hipY) * 0.006
+      // Passo lateral: o corpo inteiro desliza para os lados (hipX 86..114). Nos
+      // outros exercícios o quadril fica centralizado.
+      b('Hips').position.x =
+        nomeRef.current === 'side-step' ? hipsBaseX + (p.hipX - 100) * 0.012 : hipsBaseX
 
       // Coluna: inclinação (eixo X) distribuída em Spine/Spine1 e, no giro de
       // tronco, rotação real em torno da vertical (Y) crescendo até o Spine2.
@@ -369,9 +381,10 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
       girar(b('Neck'), dXYZ(neckX * 0.5, 0, neckZ * 0.5))
       girar(b('Head'), dXYZ(neckX * 0.7, 0, neckZ * 0.7))
 
-      // Elevação lateral: braços sobem para os LADOS (plano frontal). Giro de
-      // tronco: braços acompanham a rotação do corpo (extraY) em vez de soltos.
-      const frontal = nomeRef.current === 'lateral-raise'
+      // Braços no plano FRONTAL (abrem para os lados, em vez de frente/trás):
+      // elevação lateral, polichinelo e passo lateral — esses são vistos de frente.
+      // Giro de tronco: braços acompanham a rotação do corpo (extraY).
+      const frontal = ANIMS_DE_FRENTE.has(nomeRef.current) || nomeRef.current === 'lateral-raise'
       const extraY = nomeRef.current === 'torso-twist' ? (p.hipX - 100) * TWIST_TRONCO_GRAUS : 0
       aplicarBraco('Left', p.lUpper, p.lFore, frontal, extraY)
       aplicarBraco('Right', p.rUpper, p.rFore, frontal, extraY)
@@ -383,8 +396,18 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         punhoLigado = ehPunch
       }
 
-      aplicarPerna('Left', p.lThigh, p.lShin)
-      aplicarPerna('Right', p.rThigh, p.rShin)
+      // Polichinelo (visto de frente): as pernas ABREM para os lados (abdução no
+      // eixo Z) em vez de balançar frente/trás. lThigh>0 abre p/ a esquerda (+X)
+      // e rThigh<0 abre p/ a direita (-X); joelhos esticados.
+      if (nomeRef.current === 'jumping-jack') {
+        girar(b('LeftUpLeg'), dXYZ(0, 0, p.lThigh * DEG))
+        girar(b('RightUpLeg'), dXYZ(0, 0, p.rThigh * DEG))
+        girar(b('LeftLeg'), dXYZ(0, 0, 0))
+        girar(b('RightLeg'), dXYZ(0, 0, 0))
+      } else {
+        aplicarPerna('Left', p.lThigh, p.lShin)
+        aplicarPerna('Right', p.rThigh, p.rShin)
+      }
 
       // Pés: em repouso ficam planos. Só o "balanço de calcanhares" os usa.
       // Subir na ponta dos pés: o tornozelo flexiona (calcanhar sobe) enquanto a
@@ -439,6 +462,11 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         }
         cadeira.visible = animRef.current.prop === 'cadeira'
       }
+      // Câmera: vai para a frente do boneco nos movimentos do plano frontal,
+      // senão fica de perfil. Transição suave (lerp) ao trocar de exercício.
+      const alvoCam = ANIMS_DE_FRENTE.has(nomeRef.current) ? CAM_FRENTE : CAM_LADO
+      camera.position.lerp(alvoCam, 0.06)
+      camera.lookAt(ALVO_CAM)
       renderer.render(scene, camera)
     }
     loop()
