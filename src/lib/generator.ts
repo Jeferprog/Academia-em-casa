@@ -28,8 +28,6 @@ export interface Etapa {
   trocaLado?: boolean
 }
 
-const IDS_ALONGAMENTO_INICIAL = ['solta-pescoco', 'giro-de-tronco', 'balanco-de-perna']
-
 export interface Treino {
   etapas: Etapa[]
   totalSegundos: number
@@ -66,10 +64,13 @@ export function gerarTreino(ajustes: Ajustes, nivel: Nivel): Treino {
     embaralharComSemente(disponiveis.filter((e) => e.categoria === c), semente + c.length)
 
   // Aquecimento = alongamentos leves no início (pescoço/costas/pernas, 20s cada)
-  // + alguns movimentos dinâmicos (marcha, polichinelo leve...).
-  const alongInicial = IDS_ALONGAMENTO_INICIAL.map((id) => disponiveis.find((e) => e.id === id)).filter(
-    (e): e is Exercicio => !!e,
-  )
+  // + alguns movimentos dinâmicos (marcha, polichinelo leve...). Os alongamentos
+  // iniciais são sorteados do dia entre todos os marcados como alongamentoInicial,
+  // então variam a cada dia (mais alongamentos = mais variedade).
+  const alongInicial = embaralharComSemente(
+    disponiveis.filter((e) => e.alongamentoInicial),
+    semente + 7,
+  ).slice(0, 3)
   const numDinamico = ajustes.minutos <= 10 ? 1 : 2
   const aquecimentoDinamico = cat('aquecimento')
     .filter((e) => !e.alongamentoInicial)

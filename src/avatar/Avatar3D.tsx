@@ -346,18 +346,28 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
 
       // Coluna: inclinação (eixo X) distribuída em Spine/Spine1 e, no giro de
       // tronco, rotação real em torno da vertical (Y) crescendo até o Spine2.
-      // dXYZ usa eixos do MUNDO, então funciona em qualquer rig.
-      const lean = SINAL_TORSO * p.torso * ESCALA_TRONCO * DEG
+      // dXYZ usa eixos do MUNDO, então funciona em qualquer rig. Nos alongamentos
+      // de PESCOÇO o corpo fica parado: "torso" e hipX movem só a cabeça (abaixo).
+      const ehNeckMove = nomeRef.current === 'neck-roll' || nomeRef.current === 'neck-tilt'
+      const lean = ehNeckMove ? 0 : SINAL_TORSO * p.torso * ESCALA_TRONCO * DEG
       const tw = nomeRef.current === 'torso-twist' ? (p.hipX - 100) * TWIST_TRONCO_GRAUS * DEG : 0
       girar(b('Spine'), dXYZ(lean, tw * 0.45, 0))
       girar(b('Spine1'), dXYZ(lean * 0.7, tw * 0.75, 0))
       girar(b('Spine2'), dXYZ(0, tw, 0))
 
-      // Pescoço: nossa animação "soltar o pescoço" não tem ângulo de pescoço —
-      // ela inclina o corpo via hipX (96..104). Usamos isso para a cabeça pender.
-      const tilt = nomeRef.current === 'neck-stretch' ? (p.hipX - 100) * 7 * DEG : 0
-      girar(b('Neck'), dXYZ(0, 0, tilt * 0.5))
-      girar(b('Head'), dXYZ(0, 0, tilt * 0.7))
+      // Pescoço: inclinação lateral (eixo Z) vinda do hipX e flexão frente/trás
+      // (eixo X) vinda do "torso". 'neck-stretch' = só lateral; 'neck-tilt' = só
+      // frente/trás (queixo ao peito); 'neck-roll' = os dois (rola a cabeça).
+      let neckZ = 0
+      let neckX = 0
+      if (nomeRef.current === 'neck-stretch') neckZ = (p.hipX - 100) * 7 * DEG
+      else if (nomeRef.current === 'neck-tilt') neckX = SINAL_TORSO * p.torso * 1.4 * DEG
+      else if (nomeRef.current === 'neck-roll') {
+        neckZ = (p.hipX - 100) * 3.5 * DEG
+        neckX = SINAL_TORSO * p.torso * 1.5 * DEG
+      }
+      girar(b('Neck'), dXYZ(neckX * 0.5, 0, neckZ * 0.5))
+      girar(b('Head'), dXYZ(neckX * 0.7, 0, neckZ * 0.7))
 
       // Elevação lateral: braços sobem para os LADOS (plano frontal). Giro de
       // tronco: braços acompanham a rotação do corpo (extraY) em vez de soltos.
