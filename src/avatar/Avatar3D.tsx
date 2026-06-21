@@ -404,6 +404,15 @@ export default function Avatar3D({ anim, rodando = true, className }: Props) {
         girar(b('RightUpLeg'), dXYZ(0, 0, p.rThigh * DEG))
         girar(b('LeftLeg'), dXYZ(0, 0, 0))
         girar(b('RightLeg'), dXYZ(0, 0, 0))
+      } else if (nomeRef.current === 'side-step') {
+        // Passo lateral: a base ABRE e FECHA conforme o corpo desliza
+        // (|hipX-100|). Junto com o deslocamento do quadril, lê como passos para
+        // os lados — a perna do lado do passo planta longe, a outra fica central.
+        const aber = Math.abs(p.hipX - 100) * 2 * DEG
+        girar(b('LeftUpLeg'), dXYZ(0, 0, aber))
+        girar(b('RightUpLeg'), dXYZ(0, 0, -aber))
+        girar(b('LeftLeg'), dXYZ(0, 0, 0))
+        girar(b('RightLeg'), dXYZ(0, 0, 0))
       } else {
         aplicarPerna('Left', p.lThigh, p.lShin)
         aplicarPerna('Right', p.rThigh, p.rShin)
